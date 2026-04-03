@@ -101,9 +101,9 @@ function NewJobForm({clients,onSave,saving}){
 
   function onEq(val){setSelId(val);if(val!=="__other__"){const eq=MY_EQ.find(x=>x.id===val);setRate(eq?.rate?String(eq.rate):"");}else setRate("");setCname("");}
   function addIt(){
-    if(!selId||(isOther&&!cname.trim())||!rate)return;
+    if(!selId||(isOther&&!cname.trim()))return;
     const eq=MY_EQ.find(e=>e.id===selId);
-    const r=Number(rate),q=Number(qty)||1;
+    const r=eq?.rate||0,q=Number(qty)||1;
     const nm=isOther?cname.trim():(eq?.name||selId);
     const eid=isOther?"__other__:"+nm:selId;
     const ex=items.findIndex(i=>i.equipmentId===eid);
@@ -115,7 +115,7 @@ function NewJobForm({clients,onSave,saving}){
   const total=items.reduce((s,i)=>s+i.amount,0);
   const cats=[...new Set(MY_EQ.map(e=>e.cat))];
   const canSave=cId&&items.length>0&&!saving;
-  const canAdd=selId&&rate&&(!isOther||cname.trim());
+  const canAdd=selId&&(!isOther||cname.trim());
 
   return(
     <div>
@@ -154,7 +154,7 @@ function NewJobForm({clients,onSave,saving}){
               <option value="">— Select Equipment —</option>
               {cats.map(cat=>(
                 <optgroup key={cat} label={cat}>
-                  {MY_EQ.filter(e=>e.cat===cat).map(e=><option key={e.id} value={e.id}>{e.name} — {fmt(e.rate)}/day</option>)}
+                  {MY_EQ.filter(e=>e.cat===cat).map(e=><option key={e.id} value={e.id}>{e.name}</option>)}
                 </optgroup>
               ))}
               <optgroup label="──────────────">
@@ -162,20 +162,15 @@ function NewJobForm({clients,onSave,saving}){
               </optgroup>
             </select>
             {isOther&&<input placeholder="Type item name" value={cname} onChange={e=>setCname(e.target.value)} style={{...IS,border:"1.5px solid #7c3aed"}}/>}
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr auto",gap:8}}>
+            <div style={{display:"grid",gridTemplateColumns:"1fr auto",gap:8}}>
               <div>
                 <label style={{fontSize:11,color:"#718096",fontWeight:600,display:"block",marginBottom:3}}>QTY</label>
                 <input type="number" min="1" value={qty} onChange={e=>setQty(e.target.value)} style={{...IS,textAlign:"center"}}/>
               </div>
-              <div>
-                <label style={{fontSize:11,color:"#718096",fontWeight:600,display:"block",marginBottom:3}}>RATE ₹</label>
-                <input type="number" value={rate} onChange={e=>setRate(e.target.value)} placeholder="₹" style={{...IS,textAlign:"right"}}/>
-              </div>
               <div style={{display:"flex",alignItems:"flex-end"}}>
-                <button onClick={addIt} disabled={!canAdd} style={{padding:"10px 16px",background:canAdd?"#7c3aed":"#a0aec0",color:"#fff",border:"none",borderRadius:8,cursor:canAdd?"pointer":"not-allowed",fontWeight:700,fontSize:13,height:44}}>Add</button>
+                <button onClick={addIt} disabled={!canAdd} style={{padding:"10px 20px",background:canAdd?"#7c3aed":"#a0aec0",color:"#fff",border:"none",borderRadius:8,cursor:canAdd?"pointer":"not-allowed",fontWeight:700,fontSize:13,height:44}}>Add</button>
               </div>
             </div>
-            {canAdd&&<div style={{fontSize:12,fontWeight:600,color:"#7c3aed"}}>{qty} × {fmt(Number(rate))} = {fmt(Number(qty)*Number(rate))}</div>}
           </div>
         </div>
         {items.length===0
@@ -194,16 +189,12 @@ function NewJobForm({clients,onSave,saving}){
                       <input type="number" value={item.rate} onChange={e=>upd(idx,"rate",e.target.value)} style={{width:70,padding:"2px 6px",border:"1px solid #e2e8f0",borderRadius:4,fontSize:12,textAlign:"right",outline:"none"}}/>
                     </div>
                   </div>
-                  <div style={{display:"flex",gap:8,alignItems:"center"}}>
-                    <span style={{fontWeight:800,color:"#7c3aed",fontSize:15}}>{fmt(item.amount)}</span>
-                    <button onClick={()=>setItems(p=>p.filter((_,i)=>i!==idx))} style={{padding:"3px 8px",background:"#fff5f5",color:"#c53030",border:"1px solid #fed7d7",borderRadius:5,cursor:"pointer",fontSize:12}}>✕</button>
-                  </div>
+                  <button onClick={()=>setItems(p=>p.filter((_,i)=>i!==idx))} style={{padding:"5px 10px",background:"#fff5f5",color:"#c53030",border:"1px solid #fed7d7",borderRadius:5,cursor:"pointer",fontSize:12}}>✕</button>
                 </div>
               );
             })}
-            <div style={{display:"flex",justifyContent:"space-between",padding:"12px 14px",background:"linear-gradient(135deg,#1a0533,#7c3aed)",borderRadius:10,marginTop:4}}>
-              <span style={{fontWeight:700,color:"#fff",fontSize:15}}>Total</span>
-              <span style={{fontWeight:800,color:"#c4b5fd",fontSize:22,fontFamily:"Georgia,serif"}}>{fmt(total)}</span>
+            <div style={{padding:"10px 14px",background:"linear-gradient(135deg,#1a0533,#7c3aed)",borderRadius:10,marginTop:4,textAlign:"center"}}>
+              <span style={{fontWeight:700,color:"#c4b5fd",fontSize:14}}>{items.length} item{items.length!==1?"s":""} added ✅</span>
             </div>
           </div>
         }
@@ -248,12 +239,12 @@ function MyEntries({jobs,clients}){
                     <div style={{fontWeight:700,fontSize:14,color:"#7c3aed"}}>{cl?.name||"Unknown"}</div>
                     <div style={{fontSize:12,color:"#4a5568",marginTop:2}}>📅 {job.date}{job.programme&&` · 🎬 ${job.programme}`}{job.location&&` · 📍 ${job.location}`}</div>
                   </div>
-                  <span style={{fontWeight:800,color:"#7c3aed",fontSize:15,fontFamily:"Georgia,serif"}}>{fmt(total)}</span>
+                  
                 </div>
                 <div style={{padding:"10px 14px",display:"flex",flexWrap:"wrap",gap:6}}>
                   {job.items.map((item,i)=>{
                     const eq=MY_EQ.find(e=>e.id===item.equipmentId);
-                    return <div key={i} className="tag"><span style={{fontWeight:600,color:"#1a202c"}}>{item.customName||eq?.name}</span><span style={{color:"#718096"}}>×{item.qty}</span><span style={{color:"#7c3aed",fontWeight:700}}>{fmt(item.amount)}</span></div>;
+                    return <div key={i} className="tag"><span style={{fontWeight:600,color:"#1a202c"}}>{item.customName||eq?.name}</span><span style={{color:"#718096"}}>×{item.qty}</span></div>;
                   })}
                 </div>
                 {job.notes&&<div style={{padding:"6px 14px 10px",fontSize:12,color:"#a0aec0"}}>📝 {job.notes}</div>}
