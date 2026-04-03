@@ -9,107 +9,51 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="TCE Staff"/>
   <title>Templecity Entertainment — Staff</title>
-
   <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Templecity%20Staff%22%2C%22short_name%22%3A%22TCE%20Staff%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231a0533%22%2C%22theme_color%22%3A%22%231a0533%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fplacehold.co%2F192x192%2F1a0533%2Fc4b5fd%3Ftext%3DTCE%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D"/>
-
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
     body{font-family:'DM Sans',system-ui,sans-serif;background:#f0f2f5;overscroll-behavior:none;padding-bottom:80px;}
     input,select,textarea,button{font-family:inherit;}
-    ::-webkit-scrollbar{width:4px;}
-    ::-webkit-scrollbar-thumb{background:#cbd5e0;border-radius:3px;}
-
+    ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:#cbd5e0;border-radius:3px;}
     .header{background:linear-gradient(135deg,#1a0533,#7c3aed);padding:18px 20px 16px;position:sticky;top:0;z-index:50;}
     .tab-bar{display:flex;background:#fff;border-bottom:2px solid #f0f0f0;position:sticky;top:72px;z-index:49;}
     .tab-bar button{flex:1;padding:13px 8px;background:transparent;border:none;cursor:pointer;font-size:13px;font-weight:600;color:#a0aec0;border-bottom:2px solid transparent;margin-bottom:-2px;}
     .tab-bar button.active{color:#7c3aed;border-bottom-color:#7c3aed;}
     .card{background:#fff;border-radius:14px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,0.07);margin:16px;}
     .section-title{font-size:15px;font-weight:700;color:#1a202c;margin-bottom:14px;}
-    .IS{padding:10px 13px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:14px;outline:none;color:#1a202c;background:#fff;width:100%;}
-    .btn-primary{padding:13px;background:linear-gradient(135deg,#1a0533,#7c3aed);color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:15px;font-weight:700;width:100%;}
-    .btn-danger{padding:5px 12px;background:#fff5f5;color:#c53030;border:1px solid #fed7d7;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;}
     .tag{background:#faf5ff;border:1px solid #e9d5ff;border-radius:7px;padding:6px 11px;font-size:12px;display:inline-flex;gap:6px;align-items:center;}
-    .sync-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;}
-
-    /* Firebase setup screen */
-    #fb-setup{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:999;align-items:center;justify-content:center;padding:16px;}
-    #fb-setup.show{display:flex;}
   </style>
 </head>
 <body>
-
-
-
 <div id="root"></div>
-
 <script>
-// Firebase config from localStorage
-function getFBConfig(){
-  try{const v=localStorage.getItem("ll_firebase_config");return v?JSON.parse(v):null;}catch{return null;}
-}
-function saveFBConfig(){
-  const cfg={
-    apiKey:document.getElementById("fb-apiKey").value.trim(),
-    authDomain:document.getElementById("fb-authDomain").value.trim(),
-    projectId:document.getElementById("fb-projectId").value.trim(),
-    storageBucket:document.getElementById("fb-storageBucket").value.trim(),
-    messagingSenderId:document.getElementById("fb-messagingSenderId").value.trim(),
-    appId:document.getElementById("fb-appId").value.trim(),
-  };
-  if(!cfg.apiKey||!cfg.projectId){alert("Please fill apiKey and projectId at minimum");return;}
-  localStorage.setItem("ll_firebase_config",JSON.stringify(cfg));
-  alert("✅ Connected! App will reload now.");
-  location.reload();
-}
-
-// Auto-fill if already saved
-window.addEventListener("DOMContentLoaded",()=>{
-  const cfg=getFBConfig();
-  if(cfg){Object.entries(cfg).forEach(([k,v])=>{const el=document.getElementById("fb-"+k);if(el)el.value=v;});}
-});
-
-// PWA install
 let deferredPrompt;
-window.addEventListener("beforeinstallprompt",e=>{
-  e.preventDefault();deferredPrompt=e;
-  setTimeout(()=>{
-    if(deferredPrompt&&confirm("📲 Install Templecity Staff app on your home screen?")){
-      deferredPrompt.prompt();deferredPrompt=null;
-    }
-  },3000);
-});
-
-// Service Worker
-if("serviceWorker" in navigator){
-  const sw=`const C="tce-staff-v1";self.addEventListener("install",e=>{self.skipWaiting();});self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k)))));self.clients.claim();});self.addEventListener("fetch",e=>{e.respondWith(fetch(e.request).catch(()=>new Response("Offline")));});`;
-  const blob=new Blob([sw],{type:"application/javascript"});
-  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
-}
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;setTimeout(()=>{if(deferredPrompt&&confirm("Install Templecity Staff app?")){deferredPrompt.prompt();deferredPrompt=null;}},4000);});
+if("serviceWorker"in navigator){const sw=`self.addEventListener("install",e=>{self.skipWaiting();});self.addEventListener("activate",e=>{self.clients.claim();});self.addEventListener("fetch",e=>{e.respondWith(fetch(e.request).catch(()=>new Response("Offline")));});`;navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:"application/javascript"}))).catch(()=>{});}
 </script>
-
 <script type="text/babel">
-const {useState,useEffect,useRef}=React;
+const {useState,useEffect}=React;
 
-// ── Equipment ─────────────────────────────────────────────────────────────────
+const _sb=window.supabase.createClient("https://dnpbuwldcxmrptildfpq.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRucGJ1d2xkY3htcnB0aWxkZnBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyMDE3MDcsImV4cCI6MjA5MDc3NzcwN30.VGAGQTn-aXjAMtJCMcsI4svJRz89wkcAZuzE2gtgMM8");
+
 const MY_EQ=[
-  {id:"e1", name:"Sony FX3",    rate:3500,  cat:"Camera"},
-  {id:"e2", name:"Video Cam",   rate:1000,  cat:"Camera"},
-  {id:"e3", name:"3 Cam Setup", rate:27000, cat:"Camera"},
-  {id:"e4", name:"Gimbal",      rate:500,   cat:"Stabilizer"},
-  {id:"e5", name:"Lapel",       rate:400,   cat:"Audio"},
-  {id:"e6", name:"LC-500",      rate:500,   cat:"Light"},
-  {id:"e7", name:"DOP",         rate:2500,  cat:"Light"},
-  {id:"e8", name:"CCT",         rate:1000,  cat:"Light"},
-  {id:"e9", name:"Drone",       rate:4000,  cat:"Drone"},
-  {id:"e10",name:"Drone (WP)",  rate:2000,  cat:"Drone"},
-  {id:"e11",name:"RF",          rate:1000,  cat:"Accessory"},
-  {id:"e12",name:"Live Stream", rate:4000,  cat:"Accessory"},
+  {id:"e1",name:"Sony FX3",rate:3500,cat:"Camera"},
+  {id:"e2",name:"Video Cam",rate:1000,cat:"Camera"},
+  {id:"e3",name:"3 Cam Setup",rate:27000,cat:"Camera"},
+  {id:"e4",name:"Gimbal",rate:500,cat:"Stabilizer"},
+  {id:"e5",name:"Lapel",rate:400,cat:"Audio"},
+  {id:"e6",name:"LC-500",rate:500,cat:"Light"},
+  {id:"e7",name:"DOP",rate:2500,cat:"Light"},
+  {id:"e8",name:"CCT",rate:1000,cat:"Light"},
+  {id:"e9",name:"Drone",rate:4000,cat:"Drone"},
+  {id:"e10",name:"Drone (WP)",rate:2000,cat:"Drone"},
+  {id:"e11",name:"RF",rate:1000,cat:"Accessory"},
+  {id:"e12",name:"Live Stream",rate:4000,cat:"Accessory"},
 ];
 
 const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -121,137 +65,92 @@ const curMonth=()=>{const d=new Date();return`${d.getFullYear()}-${String(d.getM
 const load=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}};
 const saveLocal=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
 
-// ── Supabase helpers ──────────────────────────────────────────────────────────
-async function cloudSave(key, data){
-  saveLocal("ll_"+key, data);
-  try{
-    await supabase.from("ll_data").upsert({key, value:JSON.stringify(data), updated_at:new Date().toISOString()},{onConflict:"key"});
-  }catch(e){console.error("cloudSave:",e);}
+async function dbSave(key,data){
+  saveLocal("ll_"+key,data);
+  try{await _sb.from("ll_data").upsert({key,value:JSON.stringify(data),updated_at:new Date().toISOString()},{onConflict:"key"});}
+  catch(e){console.error("save:",e);}
 }
-async function cloudLoad(key, def){
+async function dbLoad(key,def){
   const local=load("ll_"+key,null);
   try{
-    const {data,error}=await supabase.from("ll_data").select("value").eq("key",key).single();
-    if(error||!data) return local!==null?local:def;
-    const parsed=JSON.parse(data.value);
-    saveLocal("ll_"+key,parsed);
-    return parsed;
+    const {data,error}=await _sb.from("ll_data").select("value").eq("key",key).single();
+    if(error||!data)return local!==null?local:def;
+    const p=JSON.parse(data.value);saveLocal("ll_"+key,p);return p;
   }catch{return local!==null?local:def;}
 }
 
-// Poll clients every 30 seconds for real-time updates
-function listenClients(cb){
-  cloudLoad("clients",[]).then(cb);
-  const interval=setInterval(()=>cloudLoad("clients",[]).then(cb),30000);
-  return ()=>clearInterval(interval);
-}
-
-async function saveJobsToCloud(jobs){
-  await cloudSave("jobs",jobs);
-}
-async function loadJobsFromCloud(){
-  return await cloudLoad("jobs",[]);
-}
-
-// ── Toast ─────────────────────────────────────────────────────────────────────
 function Toast({t}){
   if(!t)return null;
   const c={success:["#f0fff4","#276749"],error:["#fff5f5","#c53030"]}[t.type]||["#ebf8ff","#2b6cb0"];
-  return<div style={{position:"fixed",top:16,left:"50%",transform:"translateX(-50%)",zIndex:9999,padding:"12px 20px",borderRadius:10,background:c[0],color:c[1],fontWeight:700,fontSize:14,boxShadow:"0 4px 20px rgba(0,0,0,0.15)",whiteSpace:"nowrap",maxWidth:"90vw"}}>{t.type==="success"?"✅ ":"❌ "}{t.msg}</div>;
+  return <div style={{position:"fixed",top:16,left:"50%",transform:"translateX(-50%)",zIndex:9999,padding:"12px 20px",borderRadius:10,background:c[0],color:c[1],fontWeight:700,fontSize:14,boxShadow:"0 4px 20px rgba(0,0,0,0.15)",whiteSpace:"nowrap",maxWidth:"90vw"}}>{t.type==="success"?"✅ ":"❌ "}{t.msg}</div>;
 }
 
-// ── New Job Form ──────────────────────────────────────────────────────────────
 function NewJobForm({clients,onSave,saving}){
-  const [clientId,setClientId]=useState("");
+  const [cId,setCId]=useState("");
   const [date,setDate]=useState(todayStr());
-  const [programme,setProgramme]=useState("");
-  const [location,setLocation]=useState("");
+  const [prog,setProg]=useState("");
+  const [loc,setLoc]=useState("");
   const [notes,setNotes]=useState("");
   const [items,setItems]=useState([]);
   const [selId,setSelId]=useState("");
   const [qty,setQty]=useState(1);
   const [rate,setRate]=useState("");
-  const [customName,setCustomName]=useState("");
-
+  const [cname,setCname]=useState("");
   const isOther=selId==="__other__";
-  const accentCol="#7c3aed";
   const IS={padding:"10px 13px",border:"1.5px solid #e2e8f0",borderRadius:9,fontSize:14,outline:"none",color:"#1a202c",background:"#fff",width:"100%"};
 
-  function onEqChange(val){
-    setSelId(val);
-    if(val!=="__other__"){const eq=MY_EQ.find(x=>x.id===val);if(eq?.rate)setRate(String(eq.rate));else setRate("");}
-    else setRate("");
-    setCustomName("");
-  }
-
-  function addItem(){
-    if(!selId)return;
-    if(isOther&&!customName.trim())return;
+  function onEq(val){setSelId(val);if(val!=="__other__"){const eq=MY_EQ.find(x=>x.id===val);setRate(eq?.rate?String(eq.rate):"");}else setRate("");setCname("");}
+  function addIt(){
+    if(!selId||(isOther&&!cname.trim())||!rate)return;
     const eq=MY_EQ.find(e=>e.id===selId);
-    const r=Number(rate)||(eq?.rate||0);
-    const q=Number(qty)||1;
-    if(!r)return;
-    const itemName=isOther?customName.trim():(eq?.name||selId);
-    const exists=items.findIndex(i=>i.equipmentId===(isOther?"__other__:"+itemName:selId));
-    const newItems=exists>=0
-      ?items.map((it,i)=>i===exists?{...it,qty:it.qty+q,amount:(it.qty+q)*it.rate}:it)
-      :[...items,{equipmentId:isOther?"__other__:"+itemName:selId,qty:q,rate:r,amount:q*r,customName:isOther?itemName:undefined}];
-    setItems(newItems);
-    setSelId("");setQty(1);setRate("");setCustomName("");
+    const r=Number(rate),q=Number(qty)||1;
+    const nm=isOther?cname.trim():(eq?.name||selId);
+    const eid=isOther?"__other__:"+nm:selId;
+    const ex=items.findIndex(i=>i.equipmentId===eid);
+    const ni=ex>=0?items.map((it,i)=>i===ex?{...it,qty:it.qty+q,amount:(it.qty+q)*it.rate}:it):[...items,{equipmentId:eid,qty:q,rate:r,amount:q*r,customName:isOther?nm:undefined}];
+    setItems(ni);setSelId("");setQty(1);setRate("");setCname("");
   }
-
-  function updateItem(idx,field,val){
-    setItems(p=>p.map((it,i)=>{if(i!==idx)return it;const n={...it,[field]:Number(val)||0};n.amount=n.qty*n.rate;return n;}));
-  }
-
-  function reset(){
-    setClientId("");setDate(todayStr());setProgramme("");setLocation("");
-    setNotes("");setItems([]);setSelId("");setQty(1);setRate("");setCustomName("");
-  }
-
+  function upd(idx,f,v){setItems(p=>p.map((it,i)=>{if(i!==idx)return it;const n={...it,[f]:Number(v)||0};n.amount=n.qty*n.rate;return n;}));}
+  function reset(){setCId("");setDate(todayStr());setProg("");setLoc("");setNotes("");setItems([]);}
   const total=items.reduce((s,i)=>s+i.amount,0);
-  const canSave=clientId&&items.length>0&&!saving;
   const cats=[...new Set(MY_EQ.map(e=>e.cat))];
-  const canAdd=selId&&rate&&(!isOther||customName.trim());
+  const canSave=cId&&items.length>0&&!saving;
+  const canAdd=selId&&rate&&(!isOther||cname.trim());
 
   return(
     <div>
-      {/* Client */}
       <div className="card">
         <div className="section-title">📋 Job Details</div>
         <div style={{display:"flex",flexDirection:"column",gap:10}}>
           <div>
             <label style={{fontSize:11,fontWeight:700,color:"#4a5568",display:"block",marginBottom:4,textTransform:"uppercase",letterSpacing:1}}>Client *</label>
-            <select value={clientId} onChange={e=>setClientId(e.target.value)} style={IS}>
+            <select value={cId} onChange={e=>setCId(e.target.value)} style={IS}>
               <option value="">— Select Client —</option>
               {clients.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
-            {clients.length===0&&<div style={{fontSize:12,color:"#e53e3e",marginTop:4}}>⚠️ No clients found. Ask owner to add clients first.</div>}
+            {clients.length===0&&<div style={{fontSize:12,color:"#e53e3e",marginTop:4}}>⚠️ No clients yet. Owner needs to add clients first.</div>}
           </div>
           <div>
-            <label style={{fontSize:11,fontWeight:700,color:"#4a5568",display:"block",marginBottom:4,textTransform:"uppercase",letterSpacing:1}}>Date *</label>
+            <label style={{fontSize:11,fontWeight:700,color:"#4a5568",display:"block",marginBottom:4,textTransform:"uppercase"}}>Date *</label>
             <input type="date" value={date} onChange={e=>setDate(e.target.value)} style={IS}/>
           </div>
           <div>
-            <label style={{fontSize:11,fontWeight:700,color:"#4a5568",display:"block",marginBottom:4,textTransform:"uppercase",letterSpacing:1}}>Programme Name</label>
-            <input placeholder="e.g. Wedding Film, Corporate Shoot" value={programme} onChange={e=>setProgramme(e.target.value)} style={IS}/>
+            <label style={{fontSize:11,fontWeight:700,color:"#4a5568",display:"block",marginBottom:4,textTransform:"uppercase"}}>Programme Name</label>
+            <input placeholder="e.g. Wedding Film" value={prog} onChange={e=>setProg(e.target.value)} style={IS}/>
           </div>
           <div>
-            <label style={{fontSize:11,fontWeight:700,color:"#4a5568",display:"block",marginBottom:4,textTransform:"uppercase",letterSpacing:1}}>Location</label>
-            <input placeholder="e.g. Chennai, Madurai" value={location} onChange={e=>setLocation(e.target.value)} style={IS}/>
+            <label style={{fontSize:11,fontWeight:700,color:"#4a5568",display:"block",marginBottom:4,textTransform:"uppercase"}}>Location</label>
+            <input placeholder="e.g. Chennai" value={loc} onChange={e=>setLoc(e.target.value)} style={IS}/>
           </div>
         </div>
       </div>
 
-      {/* Add Equipment */}
       <div className="card">
         <div className="section-title">🎬 Equipment Used</div>
-
-        {/* Add row */}
         <div style={{background:"#faf5ff",border:"1.5px solid #e9d5ff",borderRadius:10,padding:14,marginBottom:14}}>
-          <div style={{fontSize:13,fontWeight:700,color:accentCol,marginBottom:10}}>➕ Add Item</div>
+          <div style={{fontSize:13,fontWeight:700,color:"#7c3aed",marginBottom:10}}>➕ Add Item</div>
           <div style={{display:"flex",flexDirection:"column",gap:8}}>
-            <select value={selId} onChange={e=>onEqChange(e.target.value)} style={IS}>
+            <select value={selId} onChange={e=>onEq(e.target.value)} style={IS}>
               <option value="">— Select Equipment —</option>
               {cats.map(cat=>(
                 <optgroup key={cat} label={cat}>
@@ -262,9 +161,7 @@ function NewJobForm({clients,onSave,saving}){
                 <option value="__other__">✏️ Other (Custom Item)</option>
               </optgroup>
             </select>
-            {isOther&&(
-              <input placeholder="Type item name e.g. Smoke Machine" value={customName} onChange={e=>setCustomName(e.target.value)} style={{...IS,border:`1.5px solid ${accentCol}`}}/>
-            )}
+            {isOther&&<input placeholder="Type item name" value={cname} onChange={e=>setCname(e.target.value)} style={{...IS,border:"1.5px solid #7c3aed"}}/>}
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr auto",gap:8}}>
               <div>
                 <label style={{fontSize:11,color:"#718096",fontWeight:600,display:"block",marginBottom:3}}>QTY</label>
@@ -275,38 +172,31 @@ function NewJobForm({clients,onSave,saving}){
                 <input type="number" value={rate} onChange={e=>setRate(e.target.value)} placeholder="₹" style={{...IS,textAlign:"right"}}/>
               </div>
               <div style={{display:"flex",alignItems:"flex-end"}}>
-                <button onClick={addItem} disabled={!canAdd}
-                  style={{padding:"10px 16px",background:canAdd?accentCol:"#a0aec0",color:"#fff",border:"none",borderRadius:8,cursor:canAdd?"pointer":"not-allowed",fontWeight:700,fontSize:13,height:44,whiteSpace:"nowrap"}}>
-                  Add
-                </button>
+                <button onClick={addIt} disabled={!canAdd} style={{padding:"10px 16px",background:canAdd?"#7c3aed":"#a0aec0",color:"#fff",border:"none",borderRadius:8,cursor:canAdd?"pointer":"not-allowed",fontWeight:700,fontSize:13,height:44}}>Add</button>
               </div>
             </div>
-            {canAdd&&<div style={{fontSize:12,fontWeight:600,color:accentCol}}>{qty} × {fmt(Number(rate))} = {fmt(Number(qty)*Number(rate))}</div>}
+            {canAdd&&<div style={{fontSize:12,fontWeight:600,color:"#7c3aed"}}>{qty} × {fmt(Number(rate))} = {fmt(Number(qty)*Number(rate))}</div>}
           </div>
         </div>
-
-        {/* Items list */}
         {items.length===0
-          ?<div style={{textAlign:"center",padding:"24px 0",color:"#a0aec0",fontSize:14}}>No items added yet</div>
+          ?<div style={{textAlign:"center",padding:"20px 0",color:"#a0aec0",fontSize:14}}>No items added yet</div>
           :<div>
             {items.map((item,idx)=>{
               const eq=MY_EQ.find(e=>e.id===item.equipmentId);
-              const name=item.customName||eq?.name||item.equipmentId;
+              const nm=item.customName||eq?.name||item.equipmentId;
               return(
                 <div key={idx} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 12px",borderRadius:9,background:"#faf5ff",border:"1px solid #e9d5ff",marginBottom:7}}>
                   <div>
-                    <div style={{fontWeight:700,fontSize:14,color:"#1a202c"}}>{name}</div>
+                    <div style={{fontWeight:700,fontSize:14,color:"#1a202c"}}>{nm}</div>
                     <div style={{fontSize:12,color:"#718096",marginTop:2}}>
-                      <input type="number" min="1" value={item.qty} onChange={e=>updateItem(idx,"qty",e.target.value)}
-                        style={{width:40,padding:"2px 4px",border:"1px solid #e2e8f0",borderRadius:4,fontSize:12,textAlign:"center",outline:"none"}}/>
+                      <input type="number" min="1" value={item.qty} onChange={e=>upd(idx,"qty",e.target.value)} style={{width:40,padding:"2px 4px",border:"1px solid #e2e8f0",borderRadius:4,fontSize:12,textAlign:"center",outline:"none"}}/>
                       <span style={{margin:"0 4px"}}>×</span>
-                      <input type="number" value={item.rate} onChange={e=>updateItem(idx,"rate",e.target.value)}
-                        style={{width:70,padding:"2px 6px",border:"1px solid #e2e8f0",borderRadius:4,fontSize:12,textAlign:"right",outline:"none"}}/>
+                      <input type="number" value={item.rate} onChange={e=>upd(idx,"rate",e.target.value)} style={{width:70,padding:"2px 6px",border:"1px solid #e2e8f0",borderRadius:4,fontSize:12,textAlign:"right",outline:"none"}}/>
                     </div>
                   </div>
                   <div style={{display:"flex",gap:8,alignItems:"center"}}>
-                    <span style={{fontWeight:800,color:accentCol,fontSize:15}}>{fmt(item.amount)}</span>
-                    <button onClick={()=>setItems(p=>p.filter((_,i)=>i!==idx))} className="btn-danger">✕</button>
+                    <span style={{fontWeight:800,color:"#7c3aed",fontSize:15}}>{fmt(item.amount)}</span>
+                    <button onClick={()=>setItems(p=>p.filter((_,i)=>i!==idx))} style={{padding:"3px 8px",background:"#fff5f5",color:"#c53030",border:"1px solid #fed7d7",borderRadius:5,cursor:"pointer",fontSize:12}}>✕</button>
                   </div>
                 </div>
               );
@@ -319,43 +209,32 @@ function NewJobForm({clients,onSave,saving}){
         }
       </div>
 
-      {/* Notes */}
       <div className="card">
-        <label style={{fontSize:11,fontWeight:700,color:"#4a5568",display:"block",marginBottom:6,textTransform:"uppercase",letterSpacing:1}}>Notes</label>
-        <textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Any additional notes…" rows={3}
-          style={{...IS,resize:"vertical"}}/>
+        <label style={{fontSize:11,fontWeight:700,color:"#4a5568",display:"block",marginBottom:6,textTransform:"uppercase"}}>Notes</label>
+        <textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Any additional notes…" rows={3} style={{padding:"10px 13px",border:"1.5px solid #e2e8f0",borderRadius:9,fontSize:14,outline:"none",color:"#1a202c",background:"#fff",width:"100%",resize:"vertical"}}/>
       </div>
 
-      {/* Save button */}
       <div style={{padding:"0 16px 16px"}}>
-        <button onClick={()=>{
-          if(!canSave)return;
-          onSave({id:genId(),clientId,date,programme,location,notes,items,addedBy:"member",addedAt:new Date().toISOString()});
-          reset();
-        }} disabled={!canSave}
+        <button onClick={()=>{if(!canSave)return;onSave({id:genId(),clientId:cId,date,programme:prog,location:loc,notes,items,addedBy:"member",addedAt:new Date().toISOString()});reset();}} disabled={!canSave}
           style={{padding:14,background:canSave?"linear-gradient(135deg,#1a0533,#7c3aed)":"#a0aec0",color:"#fff",border:"none",borderRadius:11,cursor:canSave?"pointer":"not-allowed",fontSize:16,fontWeight:800,width:"100%"}}>
           {saving?"⏳ Saving...":"💾 Submit Job Entry"}
         </button>
-        {!clientId&&<div style={{fontSize:12,color:"#e53e3e",textAlign:"center",marginTop:6}}>Please select a client</div>}
-        {clientId&&items.length===0&&<div style={{fontSize:12,color:"#e53e3e",textAlign:"center",marginTop:6}}>Please add at least one equipment item</div>}
+        {!cId&&<div style={{fontSize:12,color:"#e53e3e",textAlign:"center",marginTop:6}}>Please select a client</div>}
+        {cId&&items.length===0&&<div style={{fontSize:12,color:"#e53e3e",textAlign:"center",marginTop:6}}>Please add at least one item</div>}
       </div>
     </div>
   );
 }
 
-// ── My Entries (entries added by this member) ─────────────────────────────────
 function MyEntries({jobs,clients}){
-  const curM=curMonth();
-  const [selMonth,setSelMonth]=useState(curM);
-  const myJobs=jobs.filter(j=>j.addedBy==="member"&&j.date.startsWith(selMonth));
-
+  const [selM,setSelM]=useState(curMonth());
+  const myJobs=jobs.filter(j=>j.addedBy==="member"&&j.date.startsWith(selM));
   return(
     <div>
       <div className="card">
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
           <div className="section-title" style={{marginBottom:0}}>My Entries</div>
-          <input type="month" value={selMonth} onChange={e=>setSelMonth(e.target.value)}
-            style={{padding:"6px 10px",borderRadius:8,border:"1.5px solid #e2e8f0",fontSize:13,outline:"none",color:"#1a202c"}}/>
+          <input type="month" value={selM} onChange={e=>setSelM(e.target.value)} style={{padding:"6px 10px",borderRadius:8,border:"1.5px solid #e2e8f0",fontSize:13,outline:"none",color:"#1a202c"}}/>
         </div>
         {myJobs.length===0
           ?<div style={{textAlign:"center",padding:"32px 0",color:"#a0aec0",fontSize:14}}>No entries this month</div>
@@ -366,23 +245,15 @@ function MyEntries({jobs,clients}){
               <div key={job.id} style={{border:"1.5px solid #e9d5ff",borderRadius:11,marginBottom:12,overflow:"hidden"}}>
                 <div style={{background:"linear-gradient(135deg,#faf5ff,#ede9fe)",padding:"11px 14px",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
                   <div>
-                    <div style={{fontWeight:700,fontSize:14,color:"#7c3aed"}}>{cl?.name||"Unknown Client"}</div>
-                    <div style={{fontSize:12,color:"#4a5568",marginTop:2}}>
-                      📅 {job.date}{job.programme&&` · 🎬 ${job.programme}`}{job.location&&` · 📍 ${job.location}`}
-                    </div>
+                    <div style={{fontWeight:700,fontSize:14,color:"#7c3aed"}}>{cl?.name||"Unknown"}</div>
+                    <div style={{fontSize:12,color:"#4a5568",marginTop:2}}>📅 {job.date}{job.programme&&` · 🎬 ${job.programme}`}{job.location&&` · 📍 ${job.location}`}</div>
                   </div>
-                  <span style={{fontWeight:800,color:"#7c3aed",fontSize:15,fontFamily:"Georgia,serif",whiteSpace:"nowrap"}}>{fmt(total)}</span>
+                  <span style={{fontWeight:800,color:"#7c3aed",fontSize:15,fontFamily:"Georgia,serif"}}>{fmt(total)}</span>
                 </div>
                 <div style={{padding:"10px 14px",display:"flex",flexWrap:"wrap",gap:6}}>
                   {job.items.map((item,i)=>{
                     const eq=MY_EQ.find(e=>e.id===item.equipmentId);
-                    return(
-                      <div key={i} className="tag">
-                        <span style={{fontWeight:600,color:"#1a202c"}}>{item.customName||eq?.name}</span>
-                        <span style={{color:"#718096"}}>×{item.qty}</span>
-                        <span style={{color:"#7c3aed",fontWeight:700}}>{fmt(item.amount)}</span>
-                      </div>
-                    );
+                    return <div key={i} className="tag"><span style={{fontWeight:600,color:"#1a202c"}}>{item.customName||eq?.name}</span><span style={{color:"#718096"}}>×{item.qty}</span><span style={{color:"#7c3aed",fontWeight:700}}>{fmt(item.amount)}</span></div>;
                   })}
                 </div>
                 {job.notes&&<div style={{padding:"6px 14px 10px",fontSize:12,color:"#a0aec0"}}>📝 {job.notes}</div>}
@@ -395,74 +266,53 @@ function MyEntries({jobs,clients}){
   );
 }
 
-// ── Main App ──────────────────────────────────────────────────────────────────
 function App(){
   const [tab,setTab]=useState("new");
   const [clients,setClients]=useState([]);
   const [jobs,setJobs]=useState([]);
   const [saving,setSaving]=useState(false);
   const [toast,setToast]=useState(null);
-  const [syncStatus,setSyncStatus]=useState(FB_READY?"connecting":"offline");
+  const [sync,setSync]=useState("connecting");
 
   function showToast(msg,type="success"){setToast({msg,type});setTimeout(()=>setToast(null),2800);}
 
-  // Load jobs from cloud on start
   useEffect(()=>{
-    loadJobsFromCloud().then(j=>{setJobs(j);setSyncStatus(FB_READY?"synced":"offline");});
-  },[]);
-
-  // Listen to clients in real time from owner's app
-  useEffect(()=>{
-    if(!FB_READY){
-      // Load from local if no Firebase
-      const local=load("ll_clients",[]);
-      setClients(local);
-      return;
-    }
-    const unsub=listenClients(cl=>{setClients(cl);saveLocal("ll_clients",cl);});
-    return ()=>unsub();
+    setSync("connecting");
+    Promise.all([dbLoad("clients",[]),dbLoad("jobs",[])])
+      .then(([cl,jo])=>{setClients(cl);setJobs(jo);setSync("synced");})
+      .catch(()=>setSync("error"));
+    const t=setInterval(()=>dbLoad("clients",[]).then(setClients),30000);
+    return ()=>clearInterval(t);
   },[]);
 
   async function saveJob(job){
     setSaving(true);
-    const newJobs=[...jobs,job];
-    await saveJobsToCloud(newJobs);
-    setJobs(newJobs);
-    setSaving(false);
-    showToast("Job submitted successfully!");
+    const nj=[...jobs,job];
+    await dbSave("jobs",nj);
+    setJobs(nj);setSaving(false);
+    showToast("Job submitted!");
     setTab("entries");
   }
 
-  const syncColor=syncStatus==="synced"?"#6ee7b7":syncStatus==="connecting"?"#f6ad55":"#fc8181";
-  const syncLabel=syncStatus==="synced"?"☁️ Synced":syncStatus==="connecting"?"⏳ Connecting...":"📴 Offline";
+  const sc=sync==="synced"?"#6ee7b7":sync==="connecting"?"#f6ad55":"#fc8181";
+  const sl=sync==="synced"?"☁️ Synced":sync==="connecting"?"⏳ Connecting...":"⚠️ Error";
 
   return(
     <div style={{minHeight:"100vh",background:"#f0f2f5"}}>
       <Toast t={toast}/>
-
-      {/* Header */}
       <div className="header">
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
             <div style={{fontFamily:"'Playfair Display',serif",fontSize:18,color:"#fff",fontWeight:800}}>Templecity Entertainment</div>
             <div style={{fontSize:11,color:"#c4b5fd",letterSpacing:"1.5px",textTransform:"uppercase",marginTop:2}}>Staff Entry App</div>
           </div>
-          <div style={{display:"flex",gap:8,alignItems:"center"}}>
-            <span style={{fontSize:12,color:syncColor,fontWeight:600}}>{syncLabel}</span>
-<span style={{fontSize:11,color:"#6ee7b7",fontWeight:600}}>☁️ Synced</span>
-          </div>
+          <span style={{fontSize:12,color:sc,fontWeight:600}}>{sl}</span>
         </div>
       </div>
-
-      {/* Tabs */}
       <div className="tab-bar">
         <button className={tab==="new"?"active":""} onClick={()=>setTab("new")}>➕ New Entry</button>
         <button className={tab==="entries"?"active":""} onClick={()=>setTab("entries")}>📋 My Entries ({jobs.filter(j=>j.addedBy==="member").length})</button>
       </div>
-
-      {/* Content */}
-
-
       {tab==="new"&&<NewJobForm clients={clients} onSave={saveJob} saving={saving}/>}
       {tab==="entries"&&<MyEntries jobs={jobs} clients={clients}/>}
     </div>
