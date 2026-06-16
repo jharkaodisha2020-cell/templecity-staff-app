@@ -6,356 +6,429 @@
   <meta name="theme-color" content="#1a0533"/>
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="TCE Staff"/>
   <title>Templecity Entertainment — Staff</title>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-    body{font-family:'DM Sans',system-ui,sans-serif;background:#f0f2f5;overscroll-behavior:none;padding-bottom:80px;}
-    input,select,textarea,button{font-family:inherit;}
-    ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:#cbd5e0;border-radius:3px;}
-    .header{background:linear-gradient(135deg,#1a0533,#7c3aed);padding:18px 20px 16px;position:sticky;top:0;z-index:50;}
+    body{font-family:'DM Sans',system-ui,sans-serif;background:#f0f2f5;padding-bottom:80px;}
+    .header{background:linear-gradient(135deg,#1a0533,#7c3aed);padding:18px 20px;position:sticky;top:0;z-index:50;}
     .tab-bar{display:flex;background:#fff;border-bottom:2px solid #f0f0f0;position:sticky;top:72px;z-index:49;}
-    .tab-bar button{flex:1;padding:13px 8px;background:transparent;border:none;cursor:pointer;font-size:13px;font-weight:600;color:#a0aec0;border-bottom:2px solid transparent;margin-bottom:-2px;}
-    .tab-bar button.active{color:#7c3aed;border-bottom-color:#7c3aed;}
+    .tab-btn{flex:1;padding:13px 8px;background:transparent;border:none;cursor:pointer;font-size:13px;font-weight:600;color:#a0aec0;border-bottom:3px solid transparent;font-family:inherit;}
+    .tab-btn.active{color:#7c3aed;border-bottom-color:#7c3aed;}
     .card{background:#fff;border-radius:14px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,0.07);margin:16px;}
-    .section-title{font-size:15px;font-weight:700;color:#1a202c;margin-bottom:14px;}
-    .tag{background:#faf5ff;border:1px solid #e9d5ff;border-radius:7px;padding:6px 11px;font-size:12px;display:inline-flex;gap:6px;align-items:center;}
+    .inp{padding:10px 13px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:14px;outline:none;color:#1a202c;background:#fff;width:100%;font-family:inherit;}
+    .btn-primary{padding:13px;background:linear-gradient(135deg,#1a0533,#7c3aed);color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:15px;font-weight:700;width:100%;font-family:inherit;}
+    .btn-add{padding:10px 20px;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;height:44px;font-family:inherit;}
+    .btn-add:disabled{background:#a0aec0;cursor:not-allowed;}
+    .item-tag{background:#faf5ff;border:1px solid #e9d5ff;border-radius:7px;padding:6px 11px;font-size:12px;display:inline-flex;gap:6px;align-items:center;margin:3px;}
+    .entry-card{border:1.5px solid #e9d5ff;border-radius:11px;margin-bottom:12px;overflow:hidden;}
+    .entry-header{background:linear-gradient(135deg,#faf5ff,#ede9fe);padding:11px 14px;}
+    label{font-size:11px;font-weight:700;color:#4a5568;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;}
+    .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;padding:12px 20px;border-radius:10px;font-weight:700;font-size:14px;box-shadow:0 4px 20px rgba(0,0,0,0.15);white-space:nowrap;max-width:90vw;display:none;}
     #loading{position:fixed;inset:0;background:linear-gradient(135deg,#1a0533,#7c3aed);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;z-index:9999;}
     @keyframes bounce{0%,100%{transform:translateY(0);opacity:0.4}50%{transform:translateY(-10px);opacity:1}}
+    .dot{width:10px;height:10px;background:#c4b5fd;border-radius:50%;display:inline-block;margin:0 4px;}
+    select optgroup{font-weight:700;}
   </style>
 </head>
 <body>
 
+<!-- Loading Screen -->
 <div id="loading">
   <div style="font-size:48px;margin-bottom:20px;">🎬</div>
-  <div style="font-family:Georgia,serif;font-size:22px;font-weight:700;margin-bottom:6px;">Templecity Entertainment</div>
+  <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:6px;">Templecity Entertainment</div>
   <div style="font-size:11px;color:#c4b5fd;letter-spacing:3px;text-transform:uppercase;margin-bottom:28px;">Staff Entry App</div>
-  <div style="display:flex;gap:8px;">
-    <div style="width:10px;height:10px;background:#c4b5fd;border-radius:50%;animation:bounce 1s infinite 0s"></div>
-    <div style="width:10px;height:10px;background:#c4b5fd;border-radius:50%;animation:bounce 1s infinite 0.2s"></div>
-    <div style="width:10px;height:10px;background:#c4b5fd;border-radius:50%;animation:bounce 1s infinite 0.4s"></div>
+  <div>
+    <span class="dot" style="animation:bounce 1s infinite 0s"></span>
+    <span class="dot" style="animation:bounce 1s infinite 0.2s"></span>
+    <span class="dot" style="animation:bounce 1s infinite 0.4s"></span>
   </div>
 </div>
 
-<div id="root"></div>
+<!-- Toast -->
+<div class="toast" id="toast"></div>
 
-<script type="text/babel">
-const {useState, useEffect} = React;
+<!-- App -->
+<div id="app" style="display:none;">
+  <!-- Header -->
+  <div class="header">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:18px;color:#fff;font-weight:800;">Templecity Entertainment</div>
+        <div style="font-size:11px;color:#c4b5fd;letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;">Staff Entry App</div>
+      </div>
+      <span id="sync-status" style="font-size:12px;color:#f6ad55;font-weight:600;">⏳ Connecting...</span>
+    </div>
+  </div>
 
-const _sb = window.supabase.createClient(
-  "https://dnpbuwldcxmrptildfpq.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRucGJ1d2xkY3htcnB0aWxkZnBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyMDE3MDcsImV4cCI6MjA5MDc3NzcwN30.VGAGQTn-aXjAMtJCMcsI4svJRz89wkcAZuzE2gtgMM8"
-);
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-new" onclick="showTab('new')">➕ New Entry</button>
+    <button class="tab-btn" id="tab-entries" onclick="showTab('entries')">📋 My Entries (<span id="entry-count">0</span>)</button>
+  </div>
+
+  <!-- New Entry Tab -->
+  <div id="page-new">
+    <div class="card">
+      <div style="font-size:15px;font-weight:700;color:#1a202c;margin-bottom:14px;">📋 Job Details</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div>
+          <label>Client *</label>
+          <select id="sel-client" class="inp">
+            <option value="">— Select Client —</option>
+          </select>
+          <div id="no-clients" style="font-size:12px;color:#e53e3e;margin-top:4px;display:none;">⚠️ No clients yet. Owner needs to add clients first.</div>
+        </div>
+        <div>
+          <label>Date *</label>
+          <input type="date" id="inp-date" class="inp"/>
+        </div>
+        <div>
+          <label>Programme Name</label>
+          <input type="text" id="inp-prog" class="inp" placeholder="e.g. Wedding Film"/>
+        </div>
+        <div>
+          <label>Location</label>
+          <input type="text" id="inp-loc" class="inp" placeholder="e.g. Chennai"/>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:15px;font-weight:700;color:#1a202c;margin-bottom:14px;">🎬 Equipment Used</div>
+      <div style="background:#faf5ff;border:1.5px solid #e9d5ff;border-radius:10px;padding:14px;margin-bottom:14px;">
+        <div style="font-size:13px;font-weight:700;color:#7c3aed;margin-bottom:10px;">➕ Add Item</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <select id="sel-eq" class="inp" onchange="onEqChange()">
+            <option value="">— Select Equipment —</option>
+          </select>
+          <div id="custom-name-row" style="display:none;">
+            <input type="text" id="inp-custom" class="inp" placeholder="Type item name"/>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:8px;">
+            <div>
+              <label>QTY</label>
+              <input type="number" id="inp-qty" class="inp" value="1" min="1" style="text-align:center;"/>
+            </div>
+            <div style="display:flex;align-items:flex-end;">
+              <button class="btn-add" id="btn-add-item" onclick="addItem()" disabled>Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="items-list"></div>
+      <div id="items-count" style="display:none;padding:10px 14px;background:linear-gradient(135deg,#1a0533,#7c3aed);border-radius:10px;text-align:center;color:#c4b5fd;font-weight:700;font-size:14px;"></div>
+    </div>
+
+    <div class="card">
+      <label>Notes</label>
+      <textarea id="inp-notes" class="inp" rows="3" placeholder="Any additional notes…" style="resize:vertical;"></textarea>
+    </div>
+
+    <div style="padding:0 16px 16px;">
+      <button class="btn-primary" id="btn-submit" onclick="submitJob()">💾 Submit Job Entry</button>
+      <div id="submit-hint" style="font-size:12px;color:#e53e3e;text-align:center;margin-top:6px;"></div>
+    </div>
+  </div>
+
+  <!-- My Entries Tab -->
+  <div id="page-entries" style="display:none;">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div style="font-size:15px;font-weight:700;color:#1a202c;">My Entries</div>
+        <input type="month" id="sel-month" class="inp" style="width:auto;padding:6px 10px;font-size:13px;" onchange="renderEntries()"/>
+      </div>
+      <div id="entries-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Config ────────────────────────────────────────────────────────────────────
+const SUPA_URL = "https://dnpbuwldcxmrptildfpq.supabase.co";
+const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRucGJ1d2xkY3htcnB0aWxkZnBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyMDE3MDcsImV4cCI6MjA5MDc3NzcwN30.VGAGQTn-aXjAMtJCMcsI4svJRz89wkcAZuzE2gtgMM8";
+const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
 const MY_EQ = [
-  {id:"e1",  name:"Sony FX3",     rate:3500,  cat:"Camera"},
-  {id:"e2",  name:"Video Cam",    rate:1000,  cat:"Camera"},
-  {id:"e3",  name:"3 Cam Setup",  rate:27000, cat:"Camera"},
-  {id:"e4",  name:"Gimbal",       rate:500,   cat:"Stabilizer"},
-  {id:"e5",  name:"Lapel",        rate:400,   cat:"Audio"},
-  {id:"e6",  name:"LC-500",       rate:500,   cat:"Light"},
-  {id:"e7",  name:"DOP",          rate:2500,  cat:"Light"},
-  {id:"e8",  name:"CCT",          rate:1000,  cat:"Light"},
-  {id:"e9",  name:"Drone",        rate:4000,  cat:"Drone"},
-  {id:"e10", name:"Drone (WP)",   rate:2000,  cat:"Drone"},
-  {id:"e11", name:"RF",           rate:1000,  cat:"Accessory"},
-  {id:"e12", name:"Live Stream",  rate:4000,  cat:"Accessory"},
-  {id:"e13", name:"Canon R6 MK2", rate:2500,  cat:"Camera"},
-  {id:"e14", name:"Live OPT",     rate:2000,  cat:"Accessory"},
-  {id:"e15", name:"Drone OPT",    rate:2000,  cat:"Drone"},
+  {id:"e1",  name:"Sony FX3",     cat:"Camera"},
+  {id:"e2",  name:"Video Cam",    cat:"Camera"},
+  {id:"e3",  name:"3 Cam Setup",  cat:"Camera"},
+  {id:"e4",  name:"Gimbal",       cat:"Stabilizer"},
+  {id:"e5",  name:"Lapel",        cat:"Audio"},
+  {id:"e6",  name:"LC-500",       cat:"Light"},
+  {id:"e7",  name:"DOP",          cat:"Light"},
+  {id:"e8",  name:"CCT",          cat:"Light"},
+  {id:"e9",  name:"Drone",        cat:"Drone"},
+  {id:"e10", name:"Drone (WP)",   cat:"Drone"},
+  {id:"e11", name:"RF",           cat:"Accessory"},
+  {id:"e12", name:"Live Stream",  cat:"Accessory"},
+  {id:"e13", name:"Canon R6 MK2", cat:"Camera"},
+  {id:"e14", name:"Live OPT",     cat:"Accessory"},
+  {id:"e15", name:"Drone OPT",    cat:"Drone"},
 ];
 
 const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
-const genId=()=>Date.now().toString(36)+Math.random().toString(36).substr(2,5);
-const todayStr=()=>new Date().toISOString().split("T")[0];
-const fmt=n=>`₹${Number(n||0).toLocaleString("en-IN")}`;
-const fmtD=s=>{if(!s)return"";const d=new Date(s);return`${d.getDate()} ${MONTHS[d.getMonth()].slice(0,3)} ${d.getFullYear()}`;};
-const curMonth=()=>{const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;};
-const load=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}};
-const saveLocal=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
 
-async function dbSave(key,data){
-  saveLocal("ll_"+key,data);
+// ── State ─────────────────────────────────────────────────────────────────────
+let clients = JSON.parse(localStorage.getItem("ll_clients")||"[]");
+let jobs     = JSON.parse(localStorage.getItem("ll_jobs")||"[]");
+let items    = []; // current form items
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const genId  = ()=>Date.now().toString(36)+Math.random().toString(36).substr(2,5);
+const todayStr = ()=>new Date().toISOString().split("T")[0];
+const curMonth = ()=>{const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;};
+const fmtD   = s=>{if(!s)return"";const d=new Date(s);return`${d.getDate()} ${MONTHS[d.getMonth()].slice(0,3)} ${d.getFullYear()}`;};
+
+function showToast(msg, type="success"){
+  const t=document.getElementById("toast");
+  t.textContent=(type==="success"?"✅ ":"❌ ")+msg;
+  t.style.background=type==="success"?"#f0fff4":"#fff5f5";
+  t.style.color=type==="success"?"#276749":"#c53030";
+  t.style.display="block";
+  setTimeout(()=>t.style.display="none", 2800);
+}
+
+function setSync(status){
+  const el=document.getElementById("sync-status");
+  if(!el)return;
+  if(status==="synced") el.textContent="☁️ Synced", el.style.color="#6ee7b7";
+  else if(status==="error") el.textContent="⚠️ Error", el.style.color="#fc8181";
+  else el.textContent="⏳ Connecting...", el.style.color="#f6ad55";
+}
+
+// ── Cloud ─────────────────────────────────────────────────────────────────────
+async function cloudLoad(key, def){
+  const local = JSON.parse(localStorage.getItem("ll_"+key)||"null");
   try{
-    await _sb.from("ll_data").upsert({key,value:JSON.stringify(data),updated_at:new Date().toISOString()},{onConflict:"key"});
+    const {data,error}=await sb.from("ll_data").select("value").eq("key",key).single();
+    if(error||!data) return local||def;
+    const parsed=JSON.parse(data.value);
+    localStorage.setItem("ll_"+key, JSON.stringify(parsed));
+    return parsed;
+  }catch{ return local||def; }
+}
+
+async function cloudSave(key, data){
+  localStorage.setItem("ll_"+key, JSON.stringify(data));
+  try{
+    await sb.from("ll_data").upsert({key,value:JSON.stringify(data),updated_at:new Date().toISOString()},{onConflict:"key"});
   }catch(e){console.error("save:",e);}
 }
-async function dbLoad(key,def){
-  const local=load("ll_"+key,null);
-  try{
-    const {data,error}=await _sb.from("ll_data").select("value").eq("key",key).single();
-    if(error||!data)return local!==null?local:def;
-    const p=JSON.parse(data.value);
-    saveLocal("ll_"+key,p);
-    return p;
-  }catch{return local!==null?local:def;}
-}
 
-function Toast({t}){
-  if(!t)return null;
-  const c={success:["#f0fff4","#276749"],error:["#fff5f5","#c53030"]}[t.type]||["#ebf8ff","#2b6cb0"];
-  return <div style={{position:"fixed",top:16,left:"50%",transform:"translateX(-50%)",zIndex:9999,padding:"12px 20px",borderRadius:10,background:c[0],color:c[1],fontWeight:700,fontSize:14,boxShadow:"0 4px 20px rgba(0,0,0,0.15)",whiteSpace:"nowrap",maxWidth:"90vw"}}>{t.type==="success"?"✅ ":"❌ "}{t.msg}</div>;
-}
-
-function NewJobForm({clients,onSave,saving}){
-  const [cId,setCId]=useState("");
-  const [date,setDate]=useState(todayStr());
-  const [prog,setProg]=useState("");
-  const [loc,setLoc]=useState("");
-  const [notes,setNotes]=useState("");
-  const [items,setItems]=useState([]);
-  const [selId,setSelId]=useState("");
-  const [qty,setQty]=useState(1);
-  const [cname,setCname]=useState("");
-  const isOther=selId==="__other__";
-  const IS={padding:"10px 13px",border:"1.5px solid #e2e8f0",borderRadius:9,fontSize:14,outline:"none",color:"#1a202c",background:"#fff",width:"100%"};
-
-  function onEq(val){
-    setSelId(val);
-    setCname("");
-  }
-
-  function addIt(){
-    if(!selId||(isOther&&!cname.trim()))return;
-    const eq=MY_EQ.find(e=>e.id===selId);
-    const r=eq?.rate||0;
-    const q=Number(qty)||1;
-    const nm=isOther?cname.trim():(eq?.name||selId);
-    const eid=isOther?"__other__:"+nm:selId;
-    const ex=items.findIndex(i=>i.equipmentId===eid);
-    const ni=ex>=0
-      ?items.map((it,i)=>i===ex?{...it,qty:it.qty+q,amount:(it.qty+q)*it.rate}:it)
-      :[...items,{equipmentId:eid,qty:q,rate:r,amount:q*r,customName:isOther?nm:undefined}];
-    setItems(ni);
-    setSelId("");setQty(1);setCname("");
-  }
-
-  function upd(idx,f,v){
-    setItems(p=>p.map((it,i)=>{
-      if(i!==idx)return it;
-      const n={...it,[f]:Number(v)||0};
-      n.amount=n.qty*n.rate;
-      return n;
-    }));
-  }
-
-  function reset(){setCId("");setDate(todayStr());setProg("");setLoc("");setNotes("");setItems([]);}
+// ── Equipment dropdown ────────────────────────────────────────────────────────
+function buildEqDropdown(){
+  const sel=document.getElementById("sel-eq");
   const cats=[...new Set(MY_EQ.map(e=>e.cat))];
-  const canSave=cId&&items.length>0&&!saving;
-  const canAdd=selId&&(!isOther||cname.trim());
-
-  return(
-    <div>
-      <div className="card">
-        <div className="section-title">📋 Job Details</div>
-        <div style={{display:"flex",flexDirection:"column",gap:10}}>
-          <div>
-            <label style={{fontSize:11,fontWeight:700,color:"#4a5568",display:"block",marginBottom:4,textTransform:"uppercase",letterSpacing:1}}>Client *</label>
-            <select value={cId} onChange={e=>setCId(e.target.value)} style={IS}>
-              <option value="">— Select Client —</option>
-              {clients.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-            {clients.length===0&&<div style={{fontSize:12,color:"#e53e3e",marginTop:4}}>⚠️ No clients yet. Owner needs to add clients first.</div>}
-          </div>
-          <div>
-            <label style={{fontSize:11,fontWeight:700,color:"#4a5568",display:"block",marginBottom:4,textTransform:"uppercase"}}>Date *</label>
-            <input type="date" value={date} onChange={e=>setDate(e.target.value)} style={IS}/>
-          </div>
-          <div>
-            <label style={{fontSize:11,fontWeight:700,color:"#4a5568",display:"block",marginBottom:4,textTransform:"uppercase"}}>Programme Name</label>
-            <input placeholder="e.g. Wedding Film" value={prog} onChange={e=>setProg(e.target.value)} style={IS}/>
-          </div>
-          <div>
-            <label style={{fontSize:11,fontWeight:700,color:"#4a5568",display:"block",marginBottom:4,textTransform:"uppercase"}}>Location</label>
-            <input placeholder="e.g. Chennai" value={loc} onChange={e=>setLoc(e.target.value)} style={IS}/>
-          </div>
-        </div>
-      </div>
-
-      <div className="card">
-        <div className="section-title">🎬 Equipment Used</div>
-        <div style={{background:"#faf5ff",border:"1.5px solid #e9d5ff",borderRadius:10,padding:14,marginBottom:14}}>
-          <div style={{fontSize:13,fontWeight:700,color:"#7c3aed",marginBottom:10}}>➕ Add Item</div>
-          <div style={{display:"flex",flexDirection:"column",gap:8}}>
-            <select value={selId} onChange={e=>onEq(e.target.value)} style={IS}>
-              <option value="">— Select Equipment —</option>
-              {cats.map(cat=>(
-                <optgroup key={cat} label={cat}>
-                  {MY_EQ.filter(e=>e.cat===cat).map(e=><option key={e.id} value={e.id}>{e.name}</option>)}
-                </optgroup>
-              ))}
-              <optgroup label="──────────────">
-                <option value="__other__">✏️ Other (Custom Item)</option>
-              </optgroup>
-            </select>
-            {isOther&&<input placeholder="Type item name" value={cname} onChange={e=>setCname(e.target.value)} style={{...IS,border:"1.5px solid #7c3aed"}}/>}
-            <div style={{display:"grid",gridTemplateColumns:"1fr auto",gap:8}}>
-              <div>
-                <label style={{fontSize:11,color:"#718096",fontWeight:600,display:"block",marginBottom:3}}>QTY</label>
-                <input type="number" min="1" value={qty} onChange={e=>setQty(e.target.value)} style={{...IS,textAlign:"center"}}/>
-              </div>
-              <div style={{display:"flex",alignItems:"flex-end"}}>
-                <button onClick={addIt} disabled={!canAdd}
-                  style={{padding:"10px 20px",background:canAdd?"#7c3aed":"#a0aec0",color:"#fff",border:"none",borderRadius:8,cursor:canAdd?"pointer":"not-allowed",fontWeight:700,fontSize:13,height:44}}>
-                  Add
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {items.length===0
-          ?<div style={{textAlign:"center",padding:"20px 0",color:"#a0aec0",fontSize:14}}>No items added yet</div>
-          :<div>
-            {items.map((item,idx)=>{
-              const eq=MY_EQ.find(e=>e.id===item.equipmentId);
-              const nm=item.customName||eq?.name||item.equipmentId;
-              return(
-                <div key={idx} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 12px",borderRadius:9,background:"#faf5ff",border:"1px solid #e9d5ff",marginBottom:7}}>
-                  <div style={{fontWeight:700,fontSize:14,color:"#1a202c"}}>{nm}
-                    <span style={{color:"#718096",fontWeight:400,fontSize:12,marginLeft:8}}>× {item.qty}</span>
-                  </div>
-                  <button onClick={()=>setItems(p=>p.filter((_,i)=>i!==idx))}
-                    style={{padding:"3px 8px",background:"#fff5f5",color:"#c53030",border:"1px solid #fed7d7",borderRadius:5,cursor:"pointer",fontSize:12}}>✕</button>
-                </div>
-              );
-            })}
-            <div style={{padding:"10px 14px",background:"linear-gradient(135deg,#1a0533,#7c3aed)",borderRadius:10,marginTop:4,textAlign:"center"}}>
-              <span style={{fontWeight:700,color:"#c4b5fd",fontSize:14}}>{items.length} item{items.length!==1?"s":""} added ✅</span>
-            </div>
-          </div>
-        }
-      </div>
-
-      <div className="card">
-        <label style={{fontSize:11,fontWeight:700,color:"#4a5568",display:"block",marginBottom:6,textTransform:"uppercase"}}>Notes</label>
-        <textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Any additional notes…" rows={3}
-          style={{padding:"10px 13px",border:"1.5px solid #e2e8f0",borderRadius:9,fontSize:14,outline:"none",color:"#1a202c",background:"#fff",width:"100%",resize:"vertical"}}/>
-      </div>
-
-      <div style={{padding:"0 16px 16px"}}>
-        <button onClick={()=>{
-          if(!canSave)return;
-          onSave({id:genId(),clientId:cId,date,programme:prog,location:loc,notes,items,addedBy:"member",addedAt:new Date().toISOString()});
-          reset();
-        }} disabled={!canSave}
-          style={{padding:14,background:canSave?"linear-gradient(135deg,#1a0533,#7c3aed)":"#a0aec0",color:"#fff",border:"none",borderRadius:11,cursor:canSave?"pointer":"not-allowed",fontSize:16,fontWeight:800,width:"100%"}}>
-          {saving?"⏳ Saving...":"💾 Submit Job Entry"}
-        </button>
-        {!cId&&<div style={{fontSize:12,color:"#e53e3e",textAlign:"center",marginTop:6}}>Please select a client</div>}
-        {cId&&items.length===0&&<div style={{fontSize:12,color:"#e53e3e",textAlign:"center",marginTop:6}}>Please add at least one item</div>}
-      </div>
-    </div>
-  );
+  cats.forEach(cat=>{
+    const og=document.createElement("optgroup");
+    og.label=cat;
+    MY_EQ.filter(e=>e.cat===cat).forEach(e=>{
+      const opt=document.createElement("option");
+      opt.value=e.id; opt.textContent=e.name;
+      og.appendChild(opt);
+    });
+    sel.appendChild(og);
+  });
+  const og2=document.createElement("optgroup");
+  og2.label="──────────────";
+  const opt2=document.createElement("option");
+  opt2.value="__other__"; opt2.textContent="✏️ Other (Custom Item)";
+  og2.appendChild(opt2);
+  sel.appendChild(og2);
 }
 
-function MyEntries({jobs,clients}){
-  const [selM,setSelM]=useState(curMonth());
-  const myJobs=jobs.filter(j=>j.addedBy==="member"&&j.date.startsWith(selM));
-  return(
-    <div>
-      <div className="card">
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-          <div className="section-title" style={{marginBottom:0}}>My Entries</div>
-          <input type="month" value={selM} onChange={e=>setSelM(e.target.value)}
-            style={{padding:"6px 10px",borderRadius:8,border:"1.5px solid #e2e8f0",fontSize:13,outline:"none",color:"#1a202c"}}/>
-        </div>
-        {myJobs.length===0
-          ?<div style={{textAlign:"center",padding:"32px 0",color:"#a0aec0",fontSize:14}}>No entries this month</div>
-          :myJobs.map(job=>{
-            const cl=clients.find(c=>c.id===job.clientId);
-            return(
-              <div key={job.id} style={{border:"1.5px solid #e9d5ff",borderRadius:11,marginBottom:12,overflow:"hidden"}}>
-                <div style={{background:"linear-gradient(135deg,#faf5ff,#ede9fe)",padding:"11px 14px"}}>
-                  <div style={{fontWeight:700,fontSize:14,color:"#7c3aed"}}>{cl?.name||"Unknown"}</div>
-                  <div style={{fontSize:12,color:"#4a5568",marginTop:2}}>
-                    📅 {fmtD(job.date)}{job.programme&&` · 🎬 ${job.programme}`}{job.location&&` · 📍 ${job.location}`}
-                  </div>
-                </div>
-                <div style={{padding:"10px 14px",display:"flex",flexWrap:"wrap",gap:6}}>
-                  {job.items.map((item,i)=>{
-                    const eq=MY_EQ.find(e=>e.id===item.equipmentId);
-                    return <div key={i} className="tag"><span style={{fontWeight:600,color:"#1a202c"}}>{item.customName||eq?.name}</span><span style={{color:"#718096"}}>×{item.qty}</span></div>;
-                  })}
-                </div>
-                {job.notes&&<div style={{padding:"6px 14px 10px",fontSize:12,color:"#a0aec0"}}>📝 {job.notes}</div>}
-              </div>
-            );
-          })
-        }
-      </div>
-    </div>
-  );
+function onEqChange(){
+  const val=document.getElementById("sel-eq").value;
+  const customRow=document.getElementById("custom-name-row");
+  const btn=document.getElementById("btn-add-item");
+  customRow.style.display=val==="__other__"?"block":"none";
+  btn.disabled=!val;
 }
 
-function App(){
-  const [tab,setTab]=useState("new");
-  const [clients,setClients]=useState(()=>load("ll_clients",[]));
-  const [jobs,setJobs]=useState(()=>load("ll_jobs",[]));
-  const [saving,setSaving]=useState(false);
-  const [toast,setToast]=useState(null);
-  const [sync,setSync]=useState("connecting");
+// ── Items management ──────────────────────────────────────────────────────────
+function addItem(){
+  const selId=document.getElementById("sel-eq").value;
+  if(!selId) return;
+  const isOther=selId==="__other__";
+  const cname=document.getElementById("inp-custom").value.trim();
+  if(isOther&&!cname) return showToast("Please type item name","error");
+  const qty=Number(document.getElementById("inp-qty").value)||1;
+  const eq=MY_EQ.find(e=>e.id===selId);
+  const nm=isOther?cname:(eq?.name||selId);
+  const eid=isOther?"__other__:"+nm:selId;
 
-  function showToast(msg,type="success"){setToast({msg,type});setTimeout(()=>setToast(null),2800);}
-
-  useEffect(()=>{
-    document.getElementById("loading").style.display="none";
-    setSync("connecting");
-    Promise.all([dbLoad("clients",[]),dbLoad("jobs",[])])
-      .then(([cl,jo])=>{
-        if(cl.length>0)setClients(cl);
-        if(jo.length>0)setJobs(jo);
-        setSync("synced");
-      })
-      .catch(()=>setSync("error"));
-    const t=setInterval(()=>dbLoad("clients",[]).then(cl=>{if(cl.length>0)setClients(cl);}),30000);
-    return ()=>clearInterval(t);
-  },[]);
-
-  async function saveJob(job){
-    setSaving(true);
-    const nj=[...jobs,job];
-    setJobs(nj);
-    await dbSave("jobs",nj);
-    setSaving(false);
-    showToast("Job submitted!");
-    setTab("entries");
+  const exists=items.findIndex(i=>i.equipmentId===eid);
+  if(exists>=0){
+    items[exists].qty+=qty;
+    items[exists].amount=items[exists].qty*items[exists].rate;
+  } else {
+    items.push({equipmentId:eid,qty,rate:eq?.rate||0,amount:qty*(eq?.rate||0),customName:isOther?nm:undefined});
   }
 
-  const sc=sync==="synced"?"#6ee7b7":sync==="connecting"?"#f6ad55":"#fc8181";
-  const sl=sync==="synced"?"☁️ Synced":sync==="connecting"?"⏳ Connecting...":"⚠️ Error";
-
-  return(
-    <div style={{minHeight:"100vh",background:"#f0f2f5"}}>
-      <Toast t={toast}/>
-      <div className="header">
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <div>
-            <div style={{fontFamily:"'Playfair Display',serif",fontSize:18,color:"#fff",fontWeight:800}}>Templecity Entertainment</div>
-            <div style={{fontSize:11,color:"#c4b5fd",letterSpacing:"1.5px",textTransform:"uppercase",marginTop:2}}>Staff Entry App</div>
-          </div>
-          <span style={{fontSize:12,color:sc,fontWeight:600}}>{sl}</span>
-        </div>
-      </div>
-      <div className="tab-bar">
-        <button className={tab==="new"?"active":""} onClick={()=>setTab("new")}>➕ New Entry</button>
-        <button className={tab==="entries"?"active":""} onClick={()=>setTab("entries")}>
-          📋 My Entries ({jobs.filter(j=>j.addedBy==="member").length})
-        </button>
-      </div>
-      {tab==="new"&&<NewJobForm clients={clients} onSave={saveJob} saving={saving}/>}
-      {tab==="entries"&&<MyEntries jobs={jobs} clients={clients}/>}
-    </div>
-  );
+  document.getElementById("sel-eq").value="";
+  document.getElementById("inp-qty").value="1";
+  document.getElementById("inp-custom").value="";
+  document.getElementById("custom-name-row").style.display="none";
+  document.getElementById("btn-add-item").disabled=true;
+  renderItems();
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+function removeItem(idx){
+  items.splice(idx,1);
+  renderItems();
+}
+
+function renderItems(){
+  const list=document.getElementById("items-list");
+  const count=document.getElementById("items-count");
+  if(items.length===0){
+    list.innerHTML='<div style="text-align:center;padding:20px 0;color:#a0aec0;font-size:14px;">No items added yet</div>';
+    count.style.display="none";
+    return;
+  }
+  list.innerHTML=items.map((item,idx)=>{
+    const eq=MY_EQ.find(e=>e.id===item.equipmentId);
+    const nm=item.customName||eq?.name||item.equipmentId;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:9px;background:#faf5ff;border:1px solid #e9d5ff;margin-bottom:7px;">
+      <div style="font-weight:700;font-size:14px;color:#1a202c;">${nm} <span style="color:#718096;font-weight:400;font-size:12px;">× ${item.qty}</span></div>
+      <button onclick="removeItem(${idx})" style="padding:3px 8px;background:#fff5f5;color:#c53030;border:1px solid #fed7d7;border-radius:5px;cursor:pointer;font-size:12px;">✕</button>
+    </div>`;
+  }).join("");
+  count.textContent=`${items.length} item${items.length!==1?"s":""} added ✅`;
+  count.style.display="block";
+}
+
+// ── Submit ────────────────────────────────────────────────────────────────────
+async function submitJob(){
+  const cId=document.getElementById("sel-client").value;
+  const date=document.getElementById("inp-date").value;
+  const prog=document.getElementById("inp-prog").value;
+  const loc=document.getElementById("inp-loc").value;
+  const notes=document.getElementById("inp-notes").value;
+  const hint=document.getElementById("submit-hint");
+
+  if(!cId){hint.textContent="Please select a client";return;}
+  if(items.length===0){hint.textContent="Please add at least one item";return;}
+  hint.textContent="";
+
+  const btn=document.getElementById("btn-submit");
+  btn.textContent="⏳ Saving...";
+  btn.disabled=true;
+
+  const job={id:genId(),clientId:cId,date,programme:prog,location:loc,notes,items:[...items],addedBy:"member",addedAt:new Date().toISOString()};
+  const newJobs=[...jobs,job];
+  jobs=newJobs;
+  await cloudSave("jobs",newJobs);
+
+  // Reset form
+  document.getElementById("sel-client").value="";
+  document.getElementById("inp-date").value=todayStr();
+  document.getElementById("inp-prog").value="";
+  document.getElementById("inp-loc").value="";
+  document.getElementById("inp-notes").value="";
+  items=[];
+  renderItems();
+
+  btn.textContent="💾 Submit Job Entry";
+  btn.disabled=false;
+
+  updateEntryCount();
+  showToast("Job submitted successfully!");
+  showTab("entries");
+}
+
+// ── Clients dropdown ──────────────────────────────────────────────────────────
+function buildClientDropdown(){
+  const sel=document.getElementById("sel-client");
+  sel.innerHTML='<option value="">— Select Client —</option>';
+  clients.forEach(c=>{
+    const opt=document.createElement("option");
+    opt.value=c.id; opt.textContent=c.name;
+    sel.appendChild(opt);
+  });
+  document.getElementById("no-clients").style.display=clients.length===0?"block":"none";
+}
+
+// ── Entries ───────────────────────────────────────────────────────────────────
+function updateEntryCount(){
+  const myJobs=jobs.filter(j=>j.addedBy==="member");
+  document.getElementById("entry-count").textContent=myJobs.length;
+}
+
+function renderEntries(){
+  const selM=document.getElementById("sel-month").value;
+  const myJobs=jobs.filter(j=>j.addedBy==="member"&&j.date.startsWith(selM));
+  const list=document.getElementById("entries-list");
+  if(myJobs.length===0){
+    list.innerHTML='<div style="text-align:center;padding:32px 0;color:#a0aec0;font-size:14px;">No entries this month</div>';
+    return;
+  }
+  list.innerHTML=myJobs.map(job=>{
+    const cl=clients.find(c=>c.id===job.clientId);
+    const tags=job.items.map(item=>{
+      const eq=MY_EQ.find(e=>e.id===item.equipmentId);
+      const nm=item.customName||eq?.name||item.equipmentId;
+      return `<span class="item-tag"><span style="font-weight:600;color:#1a202c;">${nm}</span><span style="color:#718096;">×${item.qty}</span></span>`;
+    }).join("");
+    return `<div class="entry-card">
+      <div class="entry-header">
+        <div style="font-weight:700;font-size:14px;color:#7c3aed;">${cl?.name||"Unknown"}</div>
+        <div style="font-size:12px;color:#4a5568;margin-top:2px;">📅 ${fmtD(job.date)}${job.programme?` · 🎬 ${job.programme}`:""}${job.location?` · 📍 ${job.location}`:""}</div>
+      </div>
+      <div style="padding:10px 14px;">${tags}</div>
+      ${job.notes?`<div style="padding:6px 14px 10px;font-size:12px;color:#a0aec0;">📝 ${job.notes}</div>`:""}
+    </div>`;
+  }).join("");
+}
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function showTab(tab){
+  document.getElementById("page-new").style.display=tab==="new"?"block":"none";
+  document.getElementById("page-entries").style.display=tab==="entries"?"block":"none";
+  document.getElementById("tab-new").classList.toggle("active",tab==="new");
+  document.getElementById("tab-entries").classList.toggle("active",tab==="entries");
+  if(tab==="entries") renderEntries();
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+async function init(){
+  // Set today's date
+  document.getElementById("inp-date").value=todayStr();
+  document.getElementById("sel-month").value=curMonth();
+
+  // Build equipment dropdown
+  buildEqDropdown();
+
+  // Show app immediately with local data
+  buildClientDropdown();
+  renderItems();
+  updateEntryCount();
+  document.getElementById("loading").style.display="none";
+  document.getElementById("app").style.display="block";
+
+  // Load from cloud in background
+  setSync("connecting");
+  try{
+    const [cl,jo]=await Promise.all([cloudLoad("clients",[]),cloudLoad("jobs",[])]);
+    if(cl.length>0||clients.length===0){clients=cl;buildClientDropdown();}
+    if(jo.length>0||jobs.length===0){jobs=jo;updateEntryCount();}
+    setSync("synced");
+  }catch(e){
+    console.error("Cloud load error:",e);
+    setSync("error");
+  }
+
+  // Poll clients every 30 seconds
+  setInterval(async()=>{
+    const cl=await cloudLoad("clients",[]);
+    if(cl.length>0){clients=cl;buildClientDropdown();}
+  },30000);
+}
+
+init();
 </script>
 </body>
 </html>
