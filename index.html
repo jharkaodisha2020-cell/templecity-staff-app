@@ -12,7 +12,6 @@
   <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Templecity%20Staff%22%2C%22short_name%22%3A%22TCE%20Staff%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231a0533%22%2C%22theme_color%22%3A%22%231a0533%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fplacehold.co%2F192x192%2F1a0533%2Fc4b5fd%3Ftext%3DTCE%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D"/>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
@@ -30,290 +29,813 @@
   </style>
 </head>
 <body>
-<div id="root"></div>
+<div id="root">
+  <div id="loading-screen" style="min-height:100vh;background:linear-gradient(135deg,#1a0533,#7c3aed);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-family:'Segoe UI',sans-serif;">
+    <div style="font-size:48px;margin-bottom:20px;">🎬</div>
+    <div style="font-family:Georgia,serif;font-size:24px;font-weight:700;margin-bottom:8px;">Templecity Entertainment</div>
+    <div style="font-size:12px;color:#c4b5fd;letter-spacing:3px;text-transform:uppercase;margin-bottom:32px;">Staff Entry App</div>
+    <div style="display:flex;gap:8px;">
+      <div style="width:10px;height:10px;background:#c4b5fd;border-radius:50%;animation:bounce 1s infinite 0s"></div>
+      <div style="width:10px;height:10px;background:#c4b5fd;border-radius:50%;animation:bounce 1s infinite 0.2s"></div>
+      <div style="width:10px;height:10px;background:#c4b5fd;border-radius:50%;animation:bounce 1s infinite 0.4s"></div>
+    </div>
+    <div style="font-size:13px;color:#ddd6fe;margin-top:20px;">Loading...</div>
+  </div>
+</div>
+<style>@keyframes bounce{0%,100%{transform:translateY(0);opacity:0.4}50%{transform:translateY(-10px);opacity:1}}</style>
 <script>
+window.React=window.React||React;
+window.ReactDOM=window.ReactDOM||ReactDOM;
+const _jsx=React.createElement;
+const _jsxs=React.createElement;
+const _Fragment=React.Fragment;window.__hideLoading=function(){const el=document.getElementById('loading-screen');if(el)el.style.display='none';};</script>
+<script>
+window.React=window.React||React;
+window.ReactDOM=window.ReactDOM||ReactDOM;
+const _jsx=React.createElement;
+const _jsxs=React.createElement;
+const _Fragment=React.Fragment;
 let deferredPrompt;
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;setTimeout(()=>{if(deferredPrompt&&confirm("Install Templecity Staff app?")){deferredPrompt.prompt();deferredPrompt=null;}},4000);});
 if("serviceWorker"in navigator){const sw=`self.addEventListener("install",e=>{self.skipWaiting();});self.addEventListener("activate",e=>{self.clients.claim();});self.addEventListener("fetch",e=>{e.respondWith(fetch(e.request).catch(()=>new Response("Offline")));});`;navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:"application/javascript"}))).catch(()=>{});}
 </script>
-<script type="text/babel">
-const {useState,useEffect}=React;
-
-const _sb=window.supabase.createClient("https://dnpbuwldcxmrptildfpq.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRucGJ1d2xkY3htcnB0aWxkZnBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyMDE3MDcsImV4cCI6MjA5MDc3NzcwN30.VGAGQTn-aXjAMtJCMcsI4svJRz89wkcAZuzE2gtgMM8");
-
-const MY_EQ=[
-  {id:"e1",name:"Sony FX3",rate:3500,cat:"Camera"},
-  {id:"e2",name:"Video Cam",rate:1000,cat:"Camera"},
-  {id:"e3",name:"3 Cam Setup",rate:27000,cat:"Camera"},
-  {id:"e4",name:"Gimbal",rate:500,cat:"Stabilizer"},
-  {id:"e5",name:"Lapel",rate:400,cat:"Audio"},
-  {id:"e6",name:"LC-500",rate:500,cat:"Light"},
-  {id:"e7",name:"DOP",rate:2500,cat:"Light"},
-  {id:"e8",name:"CCT",rate:1000,cat:"Light"},
-  {id:"e9",name:"Drone",rate:4000,cat:"Drone"},
-  {id:"e10",name:"Drone (WP)",rate:2000,cat:"Drone"},
-  {id:"e11",name:"RF",rate:1000,cat:"Accessory"},
-  {id:"e12",name:"Live Stream",  rate:4000, cat:"Accessory"},
-  {id:"e13",name:"Canon R6 MK2", rate:2500, cat:"Camera"},
-  {id:"e14",name:"Live OPT",     rate:2000, cat:"Accessory"},
-  {id:"e15",name:"Drone OPT",    rate:2000, cat:"Drone"},
-];
-
-const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
-const genId=()=>Date.now().toString(36)+Math.random().toString(36).substr(2,5);
-const todayStr=()=>new Date().toISOString().split("T")[0];
-const fmt=n=>`₹${Number(n||0).toLocaleString("en-IN")}`;
-const fmtD=s=>{if(!s)return"";const d=new Date(s);return`${d.getDate()} ${MONTHS[d.getMonth()].slice(0,3)} ${d.getFullYear()}`;};
-const curMonth=()=>{const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;};
-const load=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}};
-const saveLocal=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
-
-async function dbSave(key,data){
-  saveLocal("ll_"+key,data);
-  try{await _sb.from("ll_data").upsert({key,value:JSON.stringify(data),updated_at:new Date().toISOString()},{onConflict:"key"});}
-  catch(e){console.error("save:",e);}
-}
-async function dbLoad(key,def){
-  const local=load("ll_"+key,null);
-  try{
-    const {data,error}=await _sb.from("ll_data").select("value").eq("key",key).single();
-    if(error||!data)return local!==null?local:def;
-    const p=JSON.parse(data.value);saveLocal("ll_"+key,p);return p;
-  }catch{return local!==null?local:def;}
-}
-
-function Toast({t}){
-  if(!t)return null;
-  const c={success:["#f0fff4","#276749"],error:["#fff5f5","#c53030"]}[t.type]||["#ebf8ff","#2b6cb0"];
-  return <div style={{position:"fixed",top:16,left:"50%",transform:"translateX(-50%)",zIndex:9999,padding:"12px 20px",borderRadius:10,background:c[0],color:c[1],fontWeight:700,fontSize:14,boxShadow:"0 4px 20px rgba(0,0,0,0.15)",whiteSpace:"nowrap",maxWidth:"90vw"}}>{t.type==="success"?"✅ ":"❌ "}{t.msg}</div>;
-}
-
-function NewJobForm({clients,onSave,saving}){
-  const [cId,setCId]=useState("");
-  const [date,setDate]=useState(todayStr());
-  const [prog,setProg]=useState("");
-  const [loc,setLoc]=useState("");
-  const [notes,setNotes]=useState("");
-  const [items,setItems]=useState([]);
-  const [selId,setSelId]=useState("");
-  const [qty,setQty]=useState(1);
-  const [rate,setRate]=useState("");
-  const [cname,setCname]=useState("");
-  const isOther=selId==="__other__";
-  const IS={padding:"10px 13px",border:"1.5px solid #e2e8f0",borderRadius:9,fontSize:14,outline:"none",color:"#1a202c",background:"#fff",width:"100%"};
-
-  function onEq(val){setSelId(val);if(val!=="__other__"){const eq=MY_EQ.find(x=>x.id===val);setRate(eq?.rate?String(eq.rate):"");}else setRate("");setCname("");}
-  function addIt(){
-    if(!selId||(isOther&&!cname.trim()))return;
-    const eq=MY_EQ.find(e=>e.id===selId);
-    const r=eq?.rate||0,q=Number(qty)||1;
-    const nm=isOther?cname.trim():(eq?.name||selId);
-    const eid=isOther?"__other__:"+nm:selId;
-    const ex=items.findIndex(i=>i.equipmentId===eid);
-    const ni=ex>=0?items.map((it,i)=>i===ex?{...it,qty:it.qty+q,amount:(it.qty+q)*it.rate}:it):[...items,{equipmentId:eid,qty:q,rate:r,amount:q*r,customName:isOther?nm:undefined}];
-    setItems(ni);setSelId("");setQty(1);setRate("");setCname("");
+<script>
+window.React=window.React||React;
+window.ReactDOM=window.ReactDOM||ReactDOM;
+const _jsx=React.createElement;
+const _jsxs=React.createElement;
+const _Fragment=React.Fragment;
+const {
+  useState,
+  useEffect
+} = React;
+const _sb = window.supabase.createClient("https://dnpbuwldcxmrptildfpq.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRucGJ1d2xkY3htcnB0aWxkZnBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyMDE3MDcsImV4cCI6MjA5MDc3NzcwN30.VGAGQTn-aXjAMtJCMcsI4svJRz89wkcAZuzE2gtgMM8");
+const MY_EQ = [{
+  id: "e1",
+  name: "Sony FX3",
+  rate: 3500,
+  cat: "Camera"
+}, {
+  id: "e2",
+  name: "Video Cam",
+  rate: 1000,
+  cat: "Camera"
+}, {
+  id: "e3",
+  name: "3 Cam Setup",
+  rate: 27000,
+  cat: "Camera"
+}, {
+  id: "e4",
+  name: "Gimbal",
+  rate: 500,
+  cat: "Stabilizer"
+}, {
+  id: "e5",
+  name: "Lapel",
+  rate: 400,
+  cat: "Audio"
+}, {
+  id: "e6",
+  name: "LC-500",
+  rate: 500,
+  cat: "Light"
+}, {
+  id: "e7",
+  name: "DOP",
+  rate: 2500,
+  cat: "Light"
+}, {
+  id: "e8",
+  name: "CCT",
+  rate: 1000,
+  cat: "Light"
+}, {
+  id: "e9",
+  name: "Drone",
+  rate: 4000,
+  cat: "Drone"
+}, {
+  id: "e10",
+  name: "Drone (WP)",
+  rate: 2000,
+  cat: "Drone"
+}, {
+  id: "e11",
+  name: "RF",
+  rate: 1000,
+  cat: "Accessory"
+}, {
+  id: "e12",
+  name: "Live Stream",
+  rate: 4000,
+  cat: "Accessory"
+}, {
+  id: "e13",
+  name: "Canon R6 MK2",
+  rate: 2500,
+  cat: "Camera"
+}, {
+  id: "e14",
+  name: "Live OPT",
+  rate: 2000,
+  cat: "Accessory"
+}, {
+  id: "e15",
+  name: "Drone OPT",
+  rate: 2000,
+  cat: "Drone"
+}];
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const genId = () => Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+const todayStr = () => new Date().toISOString().split("T")[0];
+const fmt = n => `₹${Number(n || 0).toLocaleString("en-IN")}`;
+const fmtD = s => {
+  if (!s) return "";
+  const d = new Date(s);
+  return `${d.getDate()} ${MONTHS[d.getMonth()].slice(0, 3)} ${d.getFullYear()}`;
+};
+const curMonth = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+};
+const load = (k, d) => {
+  try {
+    const v = localStorage.getItem(k);
+    return v ? JSON.parse(v) : d;
+  } catch {
+    return d;
   }
-  function upd(idx,f,v){setItems(p=>p.map((it,i)=>{if(i!==idx)return it;const n={...it,[f]:Number(v)||0};n.amount=n.qty*n.rate;return n;}));}
-  function reset(){setCId("");setDate(todayStr());setProg("");setLoc("");setNotes("");setItems([]);}
-  const total=items.reduce((s,i)=>s+i.amount,0);
-  const cats=[...new Set(MY_EQ.map(e=>e.cat))];
-  const canSave=cId&&items.length>0&&!saving;
-  const canAdd=selId&&(!isOther||cname.trim());
-
-  return(
-    <div>
-      <div className="card">
-        <div className="section-title">📋 Job Details</div>
-        <div style={{display:"flex",flexDirection:"column",gap:10}}>
-          <div>
-            <label style={{fontSize:11,fontWeight:700,color:"#4a5568",display:"block",marginBottom:4,textTransform:"uppercase",letterSpacing:1}}>Client *</label>
-            <select value={cId} onChange={e=>setCId(e.target.value)} style={IS}>
-              <option value="">— Select Client —</option>
-              {clients.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-            {clients.length===0&&<div style={{fontSize:12,color:"#e53e3e",marginTop:4}}>⚠️ No clients yet. Owner needs to add clients first.</div>}
-          </div>
-          <div>
-            <label style={{fontSize:11,fontWeight:700,color:"#4a5568",display:"block",marginBottom:4,textTransform:"uppercase"}}>Date *</label>
-            <input type="date" value={date} onChange={e=>setDate(e.target.value)} style={IS}/>
-          </div>
-          <div>
-            <label style={{fontSize:11,fontWeight:700,color:"#4a5568",display:"block",marginBottom:4,textTransform:"uppercase"}}>Programme Name</label>
-            <input placeholder="e.g. Wedding Film" value={prog} onChange={e=>setProg(e.target.value)} style={IS}/>
-          </div>
-          <div>
-            <label style={{fontSize:11,fontWeight:700,color:"#4a5568",display:"block",marginBottom:4,textTransform:"uppercase"}}>Location</label>
-            <input placeholder="e.g. Chennai" value={loc} onChange={e=>setLoc(e.target.value)} style={IS}/>
-          </div>
-        </div>
-      </div>
-
-      <div className="card">
-        <div className="section-title">🎬 Equipment Used</div>
-        <div style={{background:"#faf5ff",border:"1.5px solid #e9d5ff",borderRadius:10,padding:14,marginBottom:14}}>
-          <div style={{fontSize:13,fontWeight:700,color:"#7c3aed",marginBottom:10}}>➕ Add Item</div>
-          <div style={{display:"flex",flexDirection:"column",gap:8}}>
-            <select value={selId} onChange={e=>onEq(e.target.value)} style={IS}>
-              <option value="">— Select Equipment —</option>
-              {cats.map(cat=>(
-                <optgroup key={cat} label={cat}>
-                  {MY_EQ.filter(e=>e.cat===cat).map(e=><option key={e.id} value={e.id}>{e.name}</option>)}
-                </optgroup>
-              ))}
-              <optgroup label="──────────────">
-                <option value="__other__">✏️ Other (Custom Item)</option>
-              </optgroup>
-            </select>
-            {isOther&&<input placeholder="Type item name" value={cname} onChange={e=>setCname(e.target.value)} style={{...IS,border:"1.5px solid #7c3aed"}}/>}
-            <div style={{display:"grid",gridTemplateColumns:"1fr auto",gap:8}}>
-              <div>
-                <label style={{fontSize:11,color:"#718096",fontWeight:600,display:"block",marginBottom:3}}>QTY</label>
-                <input type="number" min="1" value={qty} onChange={e=>setQty(e.target.value)} style={{...IS,textAlign:"center"}}/>
-              </div>
-              <div style={{display:"flex",alignItems:"flex-end"}}>
-                <button onClick={addIt} disabled={!canAdd} style={{padding:"10px 20px",background:canAdd?"#7c3aed":"#a0aec0",color:"#fff",border:"none",borderRadius:8,cursor:canAdd?"pointer":"not-allowed",fontWeight:700,fontSize:13,height:44}}>Add</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        {items.length===0
-          ?<div style={{textAlign:"center",padding:"20px 0",color:"#a0aec0",fontSize:14}}>No items added yet</div>
-          :<div>
-            {items.map((item,idx)=>{
-              const eq=MY_EQ.find(e=>e.id===item.equipmentId);
-              const nm=item.customName||eq?.name||item.equipmentId;
-              return(
-                <div key={idx} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 12px",borderRadius:9,background:"#faf5ff",border:"1px solid #e9d5ff",marginBottom:7}}>
-                  <div>
-                    <div style={{fontWeight:700,fontSize:14,color:"#1a202c"}}>{nm}</div>
-                    <div style={{fontSize:12,color:"#718096",marginTop:2}}>
-                      <input type="number" min="1" value={item.qty} onChange={e=>upd(idx,"qty",e.target.value)} style={{width:40,padding:"2px 4px",border:"1px solid #e2e8f0",borderRadius:4,fontSize:12,textAlign:"center",outline:"none"}}/>
-                      <span style={{margin:"0 4px"}}>×</span>
-                      <input type="number" value={item.rate} onChange={e=>upd(idx,"rate",e.target.value)} style={{width:70,padding:"2px 6px",border:"1px solid #e2e8f0",borderRadius:4,fontSize:12,textAlign:"right",outline:"none"}}/>
-                    </div>
-                  </div>
-                  <button onClick={()=>setItems(p=>p.filter((_,i)=>i!==idx))} style={{padding:"5px 10px",background:"#fff5f5",color:"#c53030",border:"1px solid #fed7d7",borderRadius:5,cursor:"pointer",fontSize:12}}>✕</button>
-                </div>
-              );
-            })}
-            <div style={{padding:"10px 14px",background:"linear-gradient(135deg,#1a0533,#7c3aed)",borderRadius:10,marginTop:4,textAlign:"center"}}>
-              <span style={{fontWeight:700,color:"#c4b5fd",fontSize:14}}>{items.length} item{items.length!==1?"s":""} added ✅</span>
-            </div>
-          </div>
-        }
-      </div>
-
-      <div className="card">
-        <label style={{fontSize:11,fontWeight:700,color:"#4a5568",display:"block",marginBottom:6,textTransform:"uppercase"}}>Notes</label>
-        <textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Any additional notes…" rows={3} style={{padding:"10px 13px",border:"1.5px solid #e2e8f0",borderRadius:9,fontSize:14,outline:"none",color:"#1a202c",background:"#fff",width:"100%",resize:"vertical"}}/>
-      </div>
-
-      <div style={{padding:"0 16px 16px"}}>
-        <button onClick={()=>{if(!canSave)return;onSave({id:genId(),clientId:cId,date,programme:prog,location:loc,notes,items,addedBy:"member",addedAt:new Date().toISOString()});reset();}} disabled={!canSave}
-          style={{padding:14,background:canSave?"linear-gradient(135deg,#1a0533,#7c3aed)":"#a0aec0",color:"#fff",border:"none",borderRadius:11,cursor:canSave?"pointer":"not-allowed",fontSize:16,fontWeight:800,width:"100%"}}>
-          {saving?"⏳ Saving...":"💾 Submit Job Entry"}
-        </button>
-        {!cId&&<div style={{fontSize:12,color:"#e53e3e",textAlign:"center",marginTop:6}}>Please select a client</div>}
-        {cId&&items.length===0&&<div style={{fontSize:12,color:"#e53e3e",textAlign:"center",marginTop:6}}>Please add at least one item</div>}
-      </div>
-    </div>
-  );
+};
+const saveLocal = (k, v) => {
+  try {
+    localStorage.setItem(k, JSON.stringify(v));
+  } catch {}
+};
+async function dbSave(key, data) {
+  saveLocal("ll_" + key, data);
+  try {
+    await _sb.from("ll_data").upsert({
+      key,
+      value: JSON.stringify(data),
+      updated_at: new Date().toISOString()
+    }, {
+      onConflict: "key"
+    });
+  } catch (e) {
+    console.error("save:", e);
+  }
 }
-
-function MyEntries({jobs,clients}){
-  const [selM,setSelM]=useState(curMonth());
-  const myJobs=jobs.filter(j=>j.addedBy==="member"&&j.date.startsWith(selM));
-  return(
-    <div>
-      <div className="card">
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-          <div className="section-title" style={{marginBottom:0}}>My Entries</div>
-          <input type="month" value={selM} onChange={e=>setSelM(e.target.value)} style={{padding:"6px 10px",borderRadius:8,border:"1.5px solid #e2e8f0",fontSize:13,outline:"none",color:"#1a202c"}}/>
-        </div>
-        {myJobs.length===0
-          ?<div style={{textAlign:"center",padding:"32px 0",color:"#a0aec0",fontSize:14}}>No entries this month</div>
-          :myJobs.map(job=>{
-            const cl=clients.find(c=>c.id===job.clientId);
-            const total=job.items.reduce((s,i)=>s+i.amount,0);
-            return(
-              <div key={job.id} style={{border:"1.5px solid #e9d5ff",borderRadius:11,marginBottom:12,overflow:"hidden"}}>
-                <div style={{background:"linear-gradient(135deg,#faf5ff,#ede9fe)",padding:"11px 14px",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-                  <div>
-                    <div style={{fontWeight:700,fontSize:14,color:"#7c3aed"}}>{cl?.name||"Unknown"}</div>
-                    <div style={{fontSize:12,color:"#4a5568",marginTop:2}}>📅 {job.date}{job.programme&&` · 🎬 ${job.programme}`}{job.location&&` · 📍 ${job.location}`}</div>
-                  </div>
-                  
-                </div>
-                <div style={{padding:"10px 14px",display:"flex",flexWrap:"wrap",gap:6}}>
-                  {job.items.map((item,i)=>{
-                    const eq=MY_EQ.find(e=>e.id===item.equipmentId);
-                    return <div key={i} className="tag"><span style={{fontWeight:600,color:"#1a202c"}}>{item.customName||eq?.name}</span><span style={{color:"#718096"}}>×{item.qty}</span></div>;
-                  })}
-                </div>
-                {job.notes&&<div style={{padding:"6px 14px 10px",fontSize:12,color:"#a0aec0"}}>📝 {job.notes}</div>}
-              </div>
-            );
-          })
-        }
-      </div>
-    </div>
-  );
+async function dbLoad(key, def) {
+  const local = load("ll_" + key, null);
+  try {
+    const {
+      data,
+      error
+    } = await _sb.from("ll_data").select("value").eq("key", key).single();
+    if (error || !data) return local !== null ? local : def;
+    const p = JSON.parse(data.value);
+    saveLocal("ll_" + key, p);
+    return p;
+  } catch {
+    return local !== null ? local : def;
+  }
 }
-
-function App(){
-  const [tab,setTab]=useState("new");
-  const [clients,setClients]=useState([]);
-  const [jobs,setJobs]=useState([]);
-  const [saving,setSaving]=useState(false);
-  const [toast,setToast]=useState(null);
-  const [sync,setSync]=useState("connecting");
-
-  function showToast(msg,type="success"){setToast({msg,type});setTimeout(()=>setToast(null),2800);}
-
-  useEffect(()=>{
+function Toast({
+  t
+}) {
+  if (!t) return null;
+  const c = {
+    success: ["#f0fff4", "#276749"],
+    error: ["#fff5f5", "#c53030"]
+  }[t.type] || ["#ebf8ff", "#2b6cb0"];
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      top: 16,
+      left: "50%",
+      transform: "translateX(-50%)",
+      zIndex: 9999,
+      padding: "12px 20px",
+      borderRadius: 10,
+      background: c[0],
+      color: c[1],
+      fontWeight: 700,
+      fontSize: 14,
+      boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+      whiteSpace: "nowrap",
+      maxWidth: "90vw"
+    }
+  }, t.type === "success" ? "✅ " : "❌ ", t.msg);
+}
+function NewJobForm({
+  clients,
+  onSave,
+  saving
+}) {
+  const [cId, setCId] = useState("");
+  const [date, setDate] = useState(todayStr());
+  const [prog, setProg] = useState("");
+  const [loc, setLoc] = useState("");
+  const [notes, setNotes] = useState("");
+  const [items, setItems] = useState([]);
+  const [selId, setSelId] = useState("");
+  const [qty, setQty] = useState(1);
+  const [rate, setRate] = useState("");
+  const [cname, setCname] = useState("");
+  const isOther = selId === "__other__";
+  const IS = {
+    padding: "10px 13px",
+    border: "1.5px solid #e2e8f0",
+    borderRadius: 9,
+    fontSize: 14,
+    outline: "none",
+    color: "#1a202c",
+    background: "#fff",
+    width: "100%"
+  };
+  function onEq(val) {
+    setSelId(val);
+    if (val !== "__other__") {
+      const eq = MY_EQ.find(x => x.id === val);
+      setRate(eq?.rate ? String(eq.rate) : "");
+    } else setRate("");
+    setCname("");
+  }
+  function addIt() {
+    if (!selId || isOther && !cname.trim()) return;
+    const eq = MY_EQ.find(e => e.id === selId);
+    const r = eq?.rate || 0,
+      q = Number(qty) || 1;
+    const nm = isOther ? cname.trim() : eq?.name || selId;
+    const eid = isOther ? "__other__:" + nm : selId;
+    const ex = items.findIndex(i => i.equipmentId === eid);
+    const ni = ex >= 0 ? items.map((it, i) => i === ex ? {
+      ...it,
+      qty: it.qty + q,
+      amount: (it.qty + q) * it.rate
+    } : it) : [...items, {
+      equipmentId: eid,
+      qty: q,
+      rate: r,
+      amount: q * r,
+      customName: isOther ? nm : undefined
+    }];
+    setItems(ni);
+    setSelId("");
+    setQty(1);
+    setRate("");
+    setCname("");
+  }
+  function upd(idx, f, v) {
+    setItems(p => p.map((it, i) => {
+      if (i !== idx) return it;
+      const n = {
+        ...it,
+        [f]: Number(v) || 0
+      };
+      n.amount = n.qty * n.rate;
+      return n;
+    }));
+  }
+  function reset() {
+    setCId("");
+    setDate(todayStr());
+    setProg("");
+    setLoc("");
+    setNotes("");
+    setItems([]);
+  }
+  const total = items.reduce((s, i) => s + i.amount, 0);
+  const cats = [...new Set(MY_EQ.map(e => e.cat))];
+  const canSave = cId && items.length > 0 && !saving;
+  const canAdd = selId && (!isOther || cname.trim());
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "section-title"
+  }, "📋 Job Details"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      color: "#4a5568",
+      display: "block",
+      marginBottom: 4,
+      textTransform: "uppercase",
+      letterSpacing: 1
+    }
+  }, "Client *"), /*#__PURE__*/React.createElement("select", {
+    value: cId,
+    onChange: e => setCId(e.target.value),
+    style: IS
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "— Select Client —"), clients.map(c => /*#__PURE__*/React.createElement("option", {
+    key: c.id,
+    value: c.id
+  }, c.name))), clients.length === 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "#e53e3e",
+      marginTop: 4
+    }
+  }, "⚠️ No clients yet. Owner needs to add clients first.")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      color: "#4a5568",
+      display: "block",
+      marginBottom: 4,
+      textTransform: "uppercase"
+    }
+  }, "Date *"), /*#__PURE__*/React.createElement("input", {
+    type: "date",
+    value: date,
+    onChange: e => setDate(e.target.value),
+    style: IS
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      color: "#4a5568",
+      display: "block",
+      marginBottom: 4,
+      textTransform: "uppercase"
+    }
+  }, "Programme Name"), /*#__PURE__*/React.createElement("input", {
+    placeholder: "e.g. Wedding Film",
+    value: prog,
+    onChange: e => setProg(e.target.value),
+    style: IS
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      color: "#4a5568",
+      display: "block",
+      marginBottom: 4,
+      textTransform: "uppercase"
+    }
+  }, "Location"), /*#__PURE__*/React.createElement("input", {
+    placeholder: "e.g. Chennai",
+    value: loc,
+    onChange: e => setLoc(e.target.value),
+    style: IS
+  })))), /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "section-title"
+  }, "🎬 Equipment Used"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#faf5ff",
+      border: "1.5px solid #e9d5ff",
+      borderRadius: 10,
+      padding: 14,
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 700,
+      color: "#7c3aed",
+      marginBottom: 10
+    }
+  }, "➕ Add Item"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("select", {
+    value: selId,
+    onChange: e => onEq(e.target.value),
+    style: IS
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "— Select Equipment —"), cats.map(cat => /*#__PURE__*/React.createElement("optgroup", {
+    key: cat,
+    label: cat
+  }, MY_EQ.filter(e => e.cat === cat).map(e => /*#__PURE__*/React.createElement("option", {
+    key: e.id,
+    value: e.id
+  }, e.name)))), /*#__PURE__*/React.createElement("optgroup", {
+    label: "──────────────"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "__other__"
+  }, "✏️ Other (Custom Item)"))), isOther && /*#__PURE__*/React.createElement("input", {
+    placeholder: "Type item name",
+    value: cname,
+    onChange: e => setCname(e.target.value),
+    style: {
+      ...IS,
+      border: "1.5px solid #7c3aed"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr auto",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 11,
+      color: "#718096",
+      fontWeight: 600,
+      display: "block",
+      marginBottom: 3
+    }
+  }, "QTY"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    min: "1",
+    value: qty,
+    onChange: e => setQty(e.target.value),
+    style: {
+      ...IS,
+      textAlign: "center"
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "flex-end"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: addIt,
+    disabled: !canAdd,
+    style: {
+      padding: "10px 20px",
+      background: canAdd ? "#7c3aed" : "#a0aec0",
+      color: "#fff",
+      border: "none",
+      borderRadius: 8,
+      cursor: canAdd ? "pointer" : "not-allowed",
+      fontWeight: 700,
+      fontSize: 13,
+      height: 44
+    }
+  }, "Add"))))), items.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      padding: "20px 0",
+      color: "#a0aec0",
+      fontSize: 14
+    }
+  }, "No items added yet") : /*#__PURE__*/React.createElement("div", null, items.map((item, idx) => {
+    const eq = MY_EQ.find(e => e.id === item.equipmentId);
+    const nm = item.customName || eq?.name || item.equipmentId;
+    return /*#__PURE__*/React.createElement("div", {
+      key: idx,
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "10px 12px",
+        borderRadius: 9,
+        background: "#faf5ff",
+        border: "1px solid #e9d5ff",
+        marginBottom: 7
+      }
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontWeight: 700,
+        fontSize: 14,
+        color: "#1a202c"
+      }
+    }, nm), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: "#718096",
+        marginTop: 2
+      }
+    }, /*#__PURE__*/React.createElement("input", {
+      type: "number",
+      min: "1",
+      value: item.qty,
+      onChange: e => upd(idx, "qty", e.target.value),
+      style: {
+        width: 40,
+        padding: "2px 4px",
+        border: "1px solid #e2e8f0",
+        borderRadius: 4,
+        fontSize: 12,
+        textAlign: "center",
+        outline: "none"
+      }
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        margin: "0 4px"
+      }
+    }, "×"), /*#__PURE__*/React.createElement("input", {
+      type: "number",
+      value: item.rate,
+      onChange: e => upd(idx, "rate", e.target.value),
+      style: {
+        width: 70,
+        padding: "2px 6px",
+        border: "1px solid #e2e8f0",
+        borderRadius: 4,
+        fontSize: 12,
+        textAlign: "right",
+        outline: "none"
+      }
+    }))), /*#__PURE__*/React.createElement("button", {
+      onClick: () => setItems(p => p.filter((_, i) => i !== idx)),
+      style: {
+        padding: "5px 10px",
+        background: "#fff5f5",
+        color: "#c53030",
+        border: "1px solid #fed7d7",
+        borderRadius: 5,
+        cursor: "pointer",
+        fontSize: 12
+      }
+    }, "✕"));
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "10px 14px",
+      background: "linear-gradient(135deg,#1a0533,#7c3aed)",
+      borderRadius: 10,
+      marginTop: 4,
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 700,
+      color: "#c4b5fd",
+      fontSize: 14
+    }
+  }, items.length, " item", items.length !== 1 ? "s" : "", " added ✅")))), /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      color: "#4a5568",
+      display: "block",
+      marginBottom: 6,
+      textTransform: "uppercase"
+    }
+  }, "Notes"), /*#__PURE__*/React.createElement("textarea", {
+    value: notes,
+    onChange: e => setNotes(e.target.value),
+    placeholder: "Any additional notes…",
+    rows: 3,
+    style: {
+      padding: "10px 13px",
+      border: "1.5px solid #e2e8f0",
+      borderRadius: 9,
+      fontSize: 14,
+      outline: "none",
+      color: "#1a202c",
+      background: "#fff",
+      width: "100%",
+      resize: "vertical"
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "0 16px 16px"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      if (!canSave) return;
+      onSave({
+        id: genId(),
+        clientId: cId,
+        date,
+        programme: prog,
+        location: loc,
+        notes,
+        items,
+        addedBy: "member",
+        addedAt: new Date().toISOString()
+      });
+      reset();
+    },
+    disabled: !canSave,
+    style: {
+      padding: 14,
+      background: canSave ? "linear-gradient(135deg,#1a0533,#7c3aed)" : "#a0aec0",
+      color: "#fff",
+      border: "none",
+      borderRadius: 11,
+      cursor: canSave ? "pointer" : "not-allowed",
+      fontSize: 16,
+      fontWeight: 800,
+      width: "100%"
+    }
+  }, saving ? "⏳ Saving..." : "💾 Submit Job Entry"), !cId && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "#e53e3e",
+      textAlign: "center",
+      marginTop: 6
+    }
+  }, "Please select a client"), cId && items.length === 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "#e53e3e",
+      textAlign: "center",
+      marginTop: 6
+    }
+  }, "Please add at least one item")));
+}
+function MyEntries({
+  jobs,
+  clients
+}) {
+  const [selM, setSelM] = useState(curMonth());
+  const myJobs = jobs.filter(j => j.addedBy === "member" && j.date.startsWith(selM));
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "section-title",
+    style: {
+      marginBottom: 0
+    }
+  }, "My Entries"), /*#__PURE__*/React.createElement("input", {
+    type: "month",
+    value: selM,
+    onChange: e => setSelM(e.target.value),
+    style: {
+      padding: "6px 10px",
+      borderRadius: 8,
+      border: "1.5px solid #e2e8f0",
+      fontSize: 13,
+      outline: "none",
+      color: "#1a202c"
+    }
+  })), myJobs.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      padding: "32px 0",
+      color: "#a0aec0",
+      fontSize: 14
+    }
+  }, "No entries this month") : myJobs.map(job => {
+    const cl = clients.find(c => c.id === job.clientId);
+    const total = job.items.reduce((s, i) => s + i.amount, 0);
+    return /*#__PURE__*/React.createElement("div", {
+      key: job.id,
+      style: {
+        border: "1.5px solid #e9d5ff",
+        borderRadius: 11,
+        marginBottom: 12,
+        overflow: "hidden"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: "linear-gradient(135deg,#faf5ff,#ede9fe)",
+        padding: "11px 14px",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-start"
+      }
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontWeight: 700,
+        fontSize: 14,
+        color: "#7c3aed"
+      }
+    }, cl?.name || "Unknown"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: "#4a5568",
+        marginTop: 2
+      }
+    }, "📅 ", job.date, job.programme && ` · 🎬 ${job.programme}`, job.location && ` · 📍 ${job.location}`))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: "10px 14px",
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 6
+      }
+    }, job.items.map((item, i) => {
+      const eq = MY_EQ.find(e => e.id === item.equipmentId);
+      return /*#__PURE__*/React.createElement("div", {
+        key: i,
+        className: "tag"
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontWeight: 600,
+          color: "#1a202c"
+        }
+      }, item.customName || eq?.name), /*#__PURE__*/React.createElement("span", {
+        style: {
+          color: "#718096"
+        }
+      }, "×", item.qty));
+    })), job.notes && /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: "6px 14px 10px",
+        fontSize: 12,
+        color: "#a0aec0"
+      }
+    }, "📝 ", job.notes));
+  })));
+}
+function App() {
+  const [tab, setTab] = useState("new");
+  const [clients, setClients] = useState([]);
+  const [jobs, setJobs] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [sync, setSync] = useState("connecting");
+  function showToast(msg, type = "success") {
+    setToast({
+      msg,
+      type
+    });
+    setTimeout(() => setToast(null), 2800);
+  }
+  useEffect(() => {
     setSync("connecting");
-    Promise.all([dbLoad("clients",[]),dbLoad("jobs",[])])
-      .then(([cl,jo])=>{setClients(cl);setJobs(jo);setSync("synced");})
-      .catch(()=>setSync("error"));
-    const t=setInterval(()=>dbLoad("clients",[]).then(setClients),30000);
-    return ()=>clearInterval(t);
-  },[]);
-
-  async function saveJob(job){
+    Promise.all([dbLoad("clients", []), dbLoad("jobs", [])]).then(([cl, jo]) => {
+      setClients(cl);
+      setJobs(jo);
+      setSync("synced");
+    }).catch(() => setSync("error"));
+    const t = setInterval(() => dbLoad("clients", []).then(setClients), 30000);
+    return () => clearInterval(t);
+  }, []);
+  async function saveJob(job) {
     setSaving(true);
-    const nj=[...jobs,job];
-    await dbSave("jobs",nj);
-    setJobs(nj);setSaving(false);
+    const nj = [...jobs, job];
+    await dbSave("jobs", nj);
+    setJobs(nj);
+    setSaving(false);
     showToast("Job submitted!");
     setTab("entries");
   }
-
-  const sc=sync==="synced"?"#6ee7b7":sync==="connecting"?"#f6ad55":"#fc8181";
-  const sl=sync==="synced"?"☁️ Synced":sync==="connecting"?"⏳ Connecting...":"⚠️ Error";
-
-  return(
-    <div style={{minHeight:"100vh",background:"#f0f2f5"}}>
-      <Toast t={toast}/>
-      <div className="header">
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <div>
-            <div style={{fontFamily:"'Playfair Display',serif",fontSize:18,color:"#fff",fontWeight:800}}>Templecity Entertainment</div>
-            <div style={{fontSize:11,color:"#c4b5fd",letterSpacing:"1.5px",textTransform:"uppercase",marginTop:2}}>Staff Entry App</div>
-          </div>
-          <span style={{fontSize:12,color:sc,fontWeight:600}}>{sl}</span>
-        </div>
-      </div>
-      <div className="tab-bar">
-        <button className={tab==="new"?"active":""} onClick={()=>setTab("new")}>➕ New Entry</button>
-        <button className={tab==="entries"?"active":""} onClick={()=>setTab("entries")}>📋 My Entries ({jobs.filter(j=>j.addedBy==="member").length})</button>
-      </div>
-      {tab==="new"&&<NewJobForm clients={clients} onSave={saveJob} saving={saving}/>}
-      {tab==="entries"&&<MyEntries jobs={jobs} clients={clients}/>}
-    </div>
-  );
+  const sc = sync === "synced" ? "#6ee7b7" : sync === "connecting" ? "#f6ad55" : "#fc8181";
+  const sl = sync === "synced" ? "☁️ Synced" : sync === "connecting" ? "⏳ Connecting..." : "⚠️ Error";
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: "100vh",
+      background: "#f0f2f5"
+    }
+  }, /*#__PURE__*/React.createElement(Toast, {
+    t: toast
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "header"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'Playfair Display',serif",
+      fontSize: 18,
+      color: "#fff",
+      fontWeight: 800
+    }
+  }, "Templecity Entertainment"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "#c4b5fd",
+      letterSpacing: "1.5px",
+      textTransform: "uppercase",
+      marginTop: 2
+    }
+  }, "Staff Entry App")), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: sc,
+      fontWeight: 600
+    }
+  }, sl))), /*#__PURE__*/React.createElement("div", {
+    className: "tab-bar"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: tab === "new" ? "active" : "",
+    onClick: () => setTab("new")
+  }, "➕ New Entry"), /*#__PURE__*/React.createElement("button", {
+    className: tab === "entries" ? "active" : "",
+    onClick: () => setTab("entries")
+  }, "📋 My Entries (", jobs.filter(j => j.addedBy === "member").length, ")")), tab === "new" && /*#__PURE__*/React.createElement(NewJobForm, {
+    clients: clients,
+    onSave: saveJob,
+    saving: saving
+  }), tab === "entries" && /*#__PURE__*/React.createElement(MyEntries, {
+    jobs: jobs,
+    clients: clients
+  }));
 }
+ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(App, null));
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+if(window.__hideLoading) window.__hideLoading();
 </script>
 </body>
 </html>
